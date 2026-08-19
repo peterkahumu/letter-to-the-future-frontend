@@ -1,14 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Prata, Rubik } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AnimatedBackground from "@/components/AnimatedBackground";
+import PaperBackground from "@/components/PaperBackground";
 
-const inter = Inter({
-  variable: "--font-geist-sans",
+// Prata is the display face — headings and numerals only.
+const prata = Prata({
+  variable: "--font-prata",
   subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+});
+
+// Rubik carries body copy and UI text, weighted light by default.
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
   display: "swap",
 });
 
@@ -40,18 +50,25 @@ export const viewport: Viewport = {
   maximumScale: 5,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0f1a" },
+    { media: "(prefers-color-scheme: dark)", color: "#05100f" },
   ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col">
+    <html
+      lang="en"
+      className={`${prata.variable} ${rubik.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="min-h-full flex flex-col bg-paper text-ink">
         <ThemeProvider>
-          <AnimatedBackground />
+          <PaperBackground />
           <Navbar />
-          <main className="flex-1 relative z-10 pt-16">{children}</main>
+          <main className="relative z-10 flex-1">{children}</main>
           <Footer />
         </ThemeProvider>
       </body>

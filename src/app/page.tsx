@@ -1,182 +1,141 @@
 import Link from "next/link";
+import LetterCard from "@/components/LetterCard";
+import PointerGlow from "@/components/PointerGlow";
+import {
+  ArrowRightIcon,
+  CalendarIcon,
+  InboxIcon,
+  LockIcon,
+  PenIcon,
+} from "@/components/icons";
 
 const steps = [
   {
-    icon: "✍️",
-    title: "Write Your Letter",
+    Icon: PenIcon,
+    title: "Write your letter",
     description:
-      "Pour your thoughts, goals, and dreams into a letter to your future self.",
+      "Set down the thoughts, goals and promises that matter to you right now — as long or as short as you like.",
   },
   {
-    icon: "📅",
-    title: "Pick a Date",
+    Icon: CalendarIcon,
+    title: "Choose the date",
     description:
-      "Choose when you want to receive it — next month, next year, or even further.",
+      "Next month, next year, or a decade from now. Your letter waits, sealed, until the day arrives.",
   },
   {
-    icon: "📬",
-    title: "Receive It",
+    Icon: InboxIcon,
+    title: "Receive it",
     description:
-      "We'll deliver your letter to your inbox on the exact date you choose.",
+      "On the morning you picked, it lands in your inbox exactly as you wrote it. Nothing added, nothing lost.",
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col">
-      {/* ── Hero Section ────────────────────────────────────── */}
-      <section className="relative flex flex-col items-center justify-center px-4 py-24 sm:py-32 lg:py-40 text-center">
-        {/* Floating envelope */}
-        <div className="animate-envelope text-6xl sm:text-7xl lg:text-8xl mb-8 animate-fade-in">
-          ✉️
-        </div>
+    <>
+      {/* Hero: copy and letter graphic sit side by side from lg up */}
+      <section className="relative overflow-hidden">
+        <PointerGlow />
 
-        {/* Tagline */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-tight max-w-3xl animate-fade-in-up">
-          Write a letter to{" "}
-          <span className="bg-gradient-to-r from-primary-300 via-primary-500 to-primary-700 bg-clip-text text-transparent">
-            your future self
-          </span>
-        </h1>
+        <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-14 px-5 pb-16 pt-14 sm:px-8 sm:pb-24 sm:pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-28 lg:pt-24">
+          <div>
+            <p className="eyebrow animate-rise">A time capsule for your inbox</p>
 
-        <p className="mt-6 text-lg sm:text-xl text-text-secondary max-w-xl animate-fade-in-up delay-200">
-          Capture today's thoughts, dreams, and promises. We'll deliver them
-          to your inbox on the date you choose.
-        </p>
+            <h1 className="animate-rise delay-100 mt-5 font-display text-[2.5rem] leading-[1.08] text-ink sm:text-5xl lg:text-6xl">
+              Write a letter to{" "}
+              <span className="text-accent-display">your future self</span>.
+            </h1>
 
-        {/* CTA */}
-        <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-300">
-          <Link
-            href="/compose"
-            className="inline-flex items-center justify-center gap-2 rounded-full
-                       bg-primary-600 px-8 py-3.5 text-base font-semibold text-white
-                       shadow-lg shadow-primary-600/25
-                       transition-all duration-200
-                       hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/30
-                       active:scale-95 focus-ring"
-            id="hero-cta"
-          >
-            Start Writing
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-              />
-            </svg>
-          </Link>
-          <a
-            href="#how-it-works"
-            className="inline-flex items-center justify-center gap-2 rounded-full
-                       border border-[var(--border-default)] px-8 py-3.5
-                       text-base font-semibold text-text-secondary
-                       transition-all duration-200
-                       hover:border-primary-500/40 hover:text-primary-500 hover:bg-primary-500/5
-                       active:scale-95 focus-ring"
-            id="how-it-works-link"
-          >
-            How It Works
-          </a>
-        </div>
+            <p className="animate-rise delay-200 mt-6 max-w-md text-lg leading-relaxed text-ink-soft">
+              Capture who you are today. We hold onto it and deliver it, word
+              for word, on the date you choose.
+            </p>
 
-        {/* Stats */}
-        <div className="mt-16 grid grid-cols-2 sm:grid-cols-3 gap-8 animate-fade-in-up delay-400">
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-bold text-primary-500">
-              ∞
-            </div>
-            <div className="text-sm text-text-muted mt-1">
-              Letters possible
+            <div className="animate-rise delay-300 mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/compose"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-7 text-base font-medium text-accent-on shadow-[var(--shadow-md)] transition-colors duration-200 hover:bg-accent-hover"
+                id="hero-cta"
+              >
+                Start writing
+                <ArrowRightIcon className="h-[18px] w-[18px]" />
+              </Link>
+              <a
+                href="#how-it-works"
+                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-7 text-base font-medium text-ink transition-colors duration-200 hover:border-accent hover:text-accent-text"
+                id="how-it-works-link"
+              >
+                How it works
+              </a>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-2xl sm:text-3xl font-bold text-primary-500">
-              Free
-            </div>
-            <div className="text-sm text-text-muted mt-1">Forever</div>
-          </div>
-          <div className="text-center hidden sm:block">
-            <div className="text-2xl sm:text-3xl font-bold text-primary-500">
-              🔒
-            </div>
-            <div className="text-sm text-text-muted mt-1">Private</div>
+
+          <div className="animate-rise delay-400">
+            <LetterCard />
           </div>
         </div>
       </section>
 
-      {/* ── How It Works ────────────────────────────────────── */}
+      {/* How it works */}
       <section
         id="how-it-works"
-        className="relative px-4 py-20 sm:py-28"
+        className="scroll-mt-16 border-y border-line bg-surface"
       >
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl sm:text-4xl font-bold mb-4">
-            How It{" "}
-            <span className="bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              Works
-            </span>
-          </h2>
-          <p className="text-center text-text-secondary max-w-lg mx-auto mb-16">
-            Three simple steps to send a message across time.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-            {steps.map((step, i) => (
-              <div
-                key={step.title}
-                className="group relative rounded-[var(--radius-xl)] p-6 sm:p-8
-                           glass transition-all duration-300
-                           hover:shadow-glow hover:-translate-y-1"
-              >
-                {/* Step number */}
-                <div
-                  className="absolute -top-3 -left-2 w-7 h-7 rounded-full
-                             bg-primary-600 text-white text-xs font-bold
-                             flex items-center justify-center shadow-md"
-                >
-                  {i + 1}
-                </div>
-
-                <div className="text-4xl mb-4">{step.icon}</div>
-                <h3 className="text-lg font-semibold mb-2">{step.title}</h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            ))}
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+          <div className="max-w-2xl">
+            <p className="eyebrow">How it works</p>
+            <h2 className="mt-4 font-display text-3xl leading-tight text-ink sm:text-4xl">
+              Three steps, then time does the rest.
+            </h2>
           </div>
+
+          <ol className="mt-12 grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-3">
+            {steps.map(({ Icon, title, description }, i) => (
+              <li
+                key={title}
+                className="group bg-paper p-7 transition-colors duration-300 hover:bg-elevated sm:p-8"
+              >
+                <div className="flex items-center justify-between">
+                  <Icon className="h-6 w-6 text-accent-text" />
+                  <span className="font-display text-2xl text-line-strong transition-colors duration-300 group-hover:text-accent-display">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                </div>
+                <h3 className="mt-6 font-display text-xl text-ink">{title}</h3>
+                <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
+                  {description}
+                </p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* ── Final CTA ───────────────────────────────────────── */}
-      <section className="relative px-4 py-20 sm:py-24 text-center">
-        <div className="mx-auto max-w-2xl glass-strong rounded-[var(--radius-xl)] p-8 sm:p-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-            Ready to write?
+      {/* Closing call to action */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+        <div className="panel rounded-[var(--radius-lg)] px-7 py-14 text-center text-panel-ink sm:px-14 sm:py-20">
+          <h2 className="mx-auto max-w-2xl font-display text-3xl leading-tight sm:text-[2.75rem]">
+            Your future self is waiting to hear from you.
           </h2>
-          <p className="text-text-secondary mb-8">
-            Your future self will thank you for taking a moment to reflect.
+          <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-panel-ink-soft">
+            It takes a few minutes today and means a great deal later. Free, for
+            as long as it takes.
           </p>
           <Link
             href="/compose"
-            className="inline-flex items-center gap-2 rounded-full
-                       bg-primary-600 px-8 py-3.5 text-base font-semibold text-white
-                       shadow-lg shadow-primary-600/25
-                       transition-all duration-200
-                       hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/30
-                       active:scale-95 focus-ring"
+            className="mt-9 inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-panel-btn px-7 text-base font-medium text-panel-btn-ink transition-opacity duration-200 hover:opacity-90"
             id="final-cta"
           >
-            Write Your Letter ✨
+            Write your letter
+            <ArrowRightIcon className="h-[18px] w-[18px]" />
           </Link>
+
+          <p className="mx-auto mt-12 flex max-w-md items-center justify-center gap-2.5 border-t border-panel-line pt-6 text-sm text-panel-ink-soft">
+            <LockIcon className="h-4 w-4 shrink-0" />
+            Stored privately and sent only to the address you give us.
+          </p>
         </div>
       </section>
-    </div>
+    </>
   );
 }

@@ -1,9 +1,16 @@
 "use client";
 
-import { api, type LetterStatusResponse } from "@/lib/api";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { api, type LetterStatusResponse } from "@/lib/api";
+import {
+  ArrowRightIcon,
+  CalendarIcon,
+  ClockIcon,
+  InboxIcon,
+  PenIcon,
+} from "@/components/icons";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -17,8 +24,13 @@ function formatDate(iso: string): string {
 function daysUntil(iso: string): number {
   const target = new Date(iso);
   const now = new Date();
-  const diff = target.getTime() - now.getTime();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  return Math.max(0, Math.ceil((target.getTime() - now.getTime()) / 86_400_000));
+}
+
+function countdownLabel(days: number): string {
+  if (days === 0) return "Arriving today";
+  if (days === 1) return "1 day to go";
+  return `${days} days to go`;
 }
 
 export default function ConfirmationPage() {
@@ -39,166 +51,138 @@ export default function ConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center animate-fade-in">
-          <div className="animate-spin h-8 w-8 border-2 border-primary-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-text-secondary">Loading your letter...</p>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center px-5">
+        <p className="animate-fade text-ink-muted">Loading your letter…</p>
       </div>
     );
   }
 
   if (error || !letter) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] px-4">
-        <div className="text-center animate-fade-in">
-          <div className="text-5xl mb-4">😕</div>
-          <h1 className="text-2xl font-bold mb-2">Letter Not Found</h1>
-          <p className="text-text-secondary mb-6">
-            We couldn't find this letter. It may have been removed.
-          </p>
-          <Link
-            href="/compose"
-            className="inline-flex items-center gap-2 rounded-full
-                       bg-primary-600 px-6 py-3 text-sm font-semibold text-white
-                       hover:bg-primary-500 transition-all duration-200 active:scale-95"
-          >
-            Write a New Letter
-          </Link>
-        </div>
+      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col justify-center px-5 py-16 sm:px-8">
+        <p className="eyebrow">Not found</p>
+        <h1 className="mt-4 font-display text-3xl leading-tight text-ink sm:text-4xl">
+          We couldn’t find that letter.
+        </h1>
+        <p className="mt-4 text-lg leading-relaxed text-ink-soft">
+          The link may be incorrect, or the letter may have been removed.
+        </p>
+        <Link
+          href="/compose"
+          className="mt-8 inline-flex h-12 w-fit items-center gap-2 rounded-[var(--radius-sm)] bg-accent px-6 text-base font-medium text-accent-on transition-colors duration-200 hover:bg-accent-hover"
+        >
+          Write a new letter
+          <ArrowRightIcon className="h-[18px] w-[18px]" />
+        </Link>
       </div>
     );
   }
 
   const days = daysUntil(letter.deliver_at);
 
+  const details = [
+    { Icon: InboxIcon, label: "Delivering to", value: letter.recipient_email },
+    {
+      Icon: CalendarIcon,
+      label: "Delivery date",
+      value: formatDate(letter.deliver_at),
+    },
+    { Icon: ClockIcon, label: "Countdown", value: countdownLabel(days) },
+    { Icon: PenIcon, label: "Subject", value: letter.subject },
+  ];
+
   return (
-    <div className="flex items-center justify-center min-h-[60vh] px-4 py-12">
-      <div className="mx-auto max-w-lg w-full text-center">
-        {/* Success animation */}
-        <div className="mb-8 animate-scale-in">
-          <svg
-            className="w-20 h-20 sm:w-24 sm:h-24 mx-auto"
-            viewBox="0 0 96 96"
-            fill="none"
-          >
-            {/* Outer ring */}
-            <circle
-              cx="48"
-              cy="48"
-              r="44"
-              stroke="var(--primary-500)"
-              strokeWidth="3"
-              strokeOpacity="0.2"
-            />
-            {/* Animated ring */}
-            <circle
-              cx="48"
-              cy="48"
-              r="44"
-              stroke="var(--primary-500)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray="276"
-              strokeDashoffset="276"
-              style={{
-                animation: "check-draw 1s var(--ease-out) 0.2s forwards",
-              }}
-            />
-            {/* Check mark */}
-            <path
-              d="M30 50 L42 62 L66 38"
-              stroke="var(--primary-400)"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="animate-check"
-            />
-          </svg>
-        </div>
-
-        {/* Card */}
-        <div
-          className="glass-strong rounded-[var(--radius-xl)] p-6 sm:p-8 animate-fade-in-up delay-200"
-          style={{ boxShadow: "var(--shadow-lg)" }}
-        >
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">
-            Letter{" "}
-            <span className="bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              Sent!
-            </span>
+    <div className="mx-auto max-w-2xl px-5 py-12 sm:px-8 sm:py-16">
+      <header className="animate-rise flex items-start gap-5">
+        <SealMark />
+        <div>
+          <p className="eyebrow">Sealed</p>
+          <h1 className="mt-3 font-display text-3xl leading-tight text-ink sm:text-4xl">
+            Your letter is on its way.
           </h1>
+        </div>
+      </header>
 
-          <p className="text-text-secondary mb-6">
-            Your letter is safely stored and will be delivered on time.
-          </p>
+      <p className="animate-rise delay-100 mt-6 max-w-lg text-lg leading-relaxed text-ink-soft">
+        It’s stored safely and will be delivered on the date you chose. You can
+        close this page — nothing else is needed.
+      </p>
 
-          {/* Details */}
-          <div className="space-y-3 text-left mb-8">
-            <div className="flex items-start gap-3 p-3 rounded-[var(--radius-md)] bg-[var(--bg-elevated)]">
-              <span className="text-lg">📧</span>
-              <div>
-                <p className="text-xs text-text-muted">Delivering to</p>
-                <p className="text-sm font-medium">{letter.recipient_email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-[var(--radius-md)] bg-[var(--bg-elevated)]">
-              <span className="text-lg">📅</span>
-              <div>
-                <p className="text-xs text-text-muted">Delivery date</p>
-                <p className="text-sm font-medium">
-                  {formatDate(letter.deliver_at)}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-[var(--radius-md)] bg-[var(--bg-elevated)]">
-              <span className="text-lg">⏳</span>
-              <div>
-                <p className="text-xs text-text-muted">Countdown</p>
-                <p className="text-sm font-medium">
-                  {days === 0
-                    ? "Arriving today!"
-                    : days === 1
-                    ? "1 day to go"
-                    : `${days} days to go`}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 rounded-[var(--radius-md)] bg-[var(--bg-elevated)]">
-              <span className="text-lg">📝</span>
-              <div>
-                <p className="text-xs text-text-muted">Subject</p>
-                <p className="text-sm font-medium">{letter.subject}</p>
-              </div>
+      <dl className="animate-rise delay-200 mt-10 overflow-hidden rounded-[var(--radius-lg)] border border-line bg-elevated shadow-[var(--shadow-md)]">
+        {details.map(({ Icon, label, value }, i) => (
+          <div
+            key={label}
+            className={`flex items-start gap-4 px-5 py-5 sm:px-7 ${
+              i > 0 ? "border-t border-line" : ""
+            }`}
+          >
+            <Icon className="mt-0.5 h-5 w-5 shrink-0 text-accent-text" />
+            <div className="min-w-0">
+              <dt className="text-xs uppercase tracking-[0.16em] text-ink-muted">
+                {label}
+              </dt>
+              <dd className="mt-1.5 break-words text-base text-ink">{value}</dd>
             </div>
           </div>
+        ))}
+      </dl>
 
-          {/* Actions */}
-          <Link
-            href="/compose"
-            className="inline-flex items-center gap-2 rounded-full
-                       bg-primary-600 px-6 py-3 text-sm font-semibold text-white
-                       shadow-lg shadow-primary-600/25
-                       transition-all duration-200
-                       hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/30
-                       active:scale-95 focus-ring"
-            id="write-another-cta"
-          >
-            Write Another Letter ✨
-          </Link>
-        </div>
-
-        {/* Home link */}
+      <div className="animate-fade delay-300 mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Link
+          href="/compose"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-accent px-6 text-base font-medium text-accent-on transition-colors duration-200 hover:bg-accent-hover"
+          id="write-another-cta"
+        >
+          Write another letter
+          <ArrowRightIcon className="h-[18px] w-[18px]" />
+        </Link>
         <Link
           href="/"
-          className="inline-block mt-6 text-sm text-text-muted hover:text-primary-500 transition-colors duration-200"
+          className="inline-flex h-12 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-6 text-base font-medium text-ink transition-colors duration-200 hover:border-accent hover:text-accent-text"
         >
-          ← Back to Home
+          Back to home
         </Link>
       </div>
     </div>
+  );
+}
+
+/** Wax-seal style confirmation mark that draws itself once on mount. */
+function SealMark() {
+  return (
+    <svg
+      className="h-14 w-14 shrink-0 sm:h-16 sm:w-16"
+      viewBox="0 0 64 64"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="32"
+        cy="32"
+        r="29"
+        stroke="var(--line-strong)"
+        strokeWidth="2"
+      />
+      <circle
+        cx="32"
+        cy="32"
+        r="29"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        pathLength={300}
+        className="animate-seal"
+        transform="rotate(-90 32 32)"
+      />
+      <path
+        d="M21 33.5 28.5 41 44 24"
+        stroke="var(--accent)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        pathLength={300}
+        className="animate-seal"
+      />
+    </svg>
   );
 }

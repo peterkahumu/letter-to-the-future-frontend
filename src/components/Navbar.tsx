@@ -1,82 +1,69 @@
 "use client";
 
-import { useTheme } from "@/components/ThemeProvider";
 import Link from "next/link";
-import { useState } from "react";
-
-const themeIcons: Record<string, string> = {
-  light: "☀️",
-  dark: "🌙",
-  system: "💻",
-};
-
-const themeLabels: Record<string, string> = {
-  light: "Light",
-  dark: "Dark",
-  system: "System",
-};
+import { useTheme } from "@/components/ThemeProvider";
+import {
+  EnvelopeIcon,
+  MonitorIcon,
+  MoonIcon,
+  SunIcon,
+} from "@/components/icons";
 
 const themeOrder = ["light", "dark", "system"] as const;
 
+const themeMeta = {
+  light: { label: "Light", Icon: SunIcon },
+  dark: { label: "Dark", Icon: MoonIcon },
+  system: { label: "System", Icon: MonitorIcon },
+} as const;
+
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { label, Icon } = themeMeta[theme];
 
   const cycleTheme = () => {
-    const currentIndex = themeOrder.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themeOrder.length;
-    setTheme(themeOrder[nextIndex]);
+    const next = (themeOrder.indexOf(theme) + 1) % themeOrder.length;
+    setTheme(themeOrder[next]);
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-lg font-bold transition-colors duration-200 hover:text-primary-500"
-            id="nav-logo"
+    <header className="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur-sm">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8">
+        <Link
+          href="/"
+          className="group flex items-center gap-2.5"
+          id="nav-logo"
+        >
+          <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-accent text-accent-on">
+            <EnvelopeIcon className="h-5 w-5" />
+          </span>
+          <span className="font-display text-base leading-none text-ink sm:text-lg">
+            Letter to the Future
+          </span>
+        </Link>
+
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={cycleTheme}
+            className="flex h-9 items-center gap-2 rounded-[var(--radius-sm)] border border-line px-2.5 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink sm:px-3"
+            aria-label={`Theme: ${label}. Activate to change.`}
+            id="theme-toggle"
           >
-            <span className="text-2xl">✉️</span>
-            <span className="hidden sm:inline bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              Letter to the Future
-            </span>
-            <span className="sm:hidden bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              LTTF
-            </span>
+            <Icon className="h-[18px] w-[18px]" />
+            <span className="hidden sm:inline">{label}</span>
+          </button>
+
+          <Link
+            href="/compose"
+            className="flex h-9 items-center rounded-[var(--radius-sm)] bg-accent px-3.5 text-sm font-medium text-accent-on transition-colors duration-200 hover:bg-accent-hover sm:px-5"
+            id="nav-compose-cta"
+          >
+            <span className="sm:hidden">Write</span>
+            <span className="hidden sm:inline">Write a letter</span>
           </Link>
-
-          {/* Desktop actions */}
-          <div className="flex items-center gap-3">
-            {/* Theme toggle */}
-            <button
-              onClick={cycleTheme}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium
-                         text-text-secondary hover:text-text-primary
-                         transition-all duration-200 hover:bg-primary-500/10
-                         focus-ring"
-              aria-label={`Current theme: ${themeLabels[theme]}. Click to switch.`}
-              id="theme-toggle"
-            >
-              <span className="text-lg">{themeIcons[theme]}</span>
-              <span className="hidden sm:inline">{themeLabels[theme]}</span>
-            </button>
-
-            {/* CTA */}
-            <Link
-              href="/compose"
-              className="rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white
-                         shadow-md transition-all duration-200
-                         hover:bg-primary-500 hover:shadow-lg hover:shadow-primary-500/25
-                         active:scale-95 focus-ring"
-              id="nav-compose-cta"
-            >
-              Write a Letter
-            </Link>
-          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
