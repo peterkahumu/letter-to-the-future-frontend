@@ -55,6 +55,14 @@ export default function Navbar() {
           </button>
 
           <Link
+            href="/public"
+            className="flex h-9 items-center rounded-[var(--radius-sm)] border border-line px-2.5 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink sm:px-3"
+          >
+            <span className="sm:hidden">Board</span>
+            <span className="hidden sm:inline">Public Board</span>
+          </Link>
+
+          <Link
             href="/compose"
             className="flex h-9 items-center rounded-[var(--radius-sm)] bg-accent px-3.5 text-sm font-medium text-accent-on transition-colors duration-200 hover:bg-accent-hover sm:px-5"
             id="nav-compose-cta"

@@ -9,6 +9,9 @@ export interface LetterPayload {
   sender_name: string;
   subject: string;
   body: string;
+  media_url?: string | null;
+  is_public: boolean;
+  is_anonymous: boolean;
   deliver_at: string; // ISO date string YYYY-MM-DD
 }
 
@@ -18,6 +21,9 @@ export interface LetterResponse {
   sender_name: string;
   subject: string;
   body: string;
+  media_url: string | null;
+  is_public: boolean;
+  is_anonymous: boolean;
   deliver_at: string;
   is_sent: boolean;
   sent_at: string | null;
@@ -28,6 +34,8 @@ export interface LetterStatusResponse {
   id: string;
   recipient_email: string;
   subject: string;
+  is_public: boolean;
+  is_anonymous: boolean;
   deliver_at: string;
   is_sent: boolean;
   sent_at: string | null;
@@ -81,6 +89,30 @@ class ApiService {
 
   async checkHealth(): Promise<{ status: string; version: string }> {
     return this.request("/health");
+  }
+
+  async uploadMedia(file: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const url = `${this.baseUrl}/api/letters/upload`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error: ApiError = await response.json().catch(() => ({
+        detail: `Upload failed with status ${response.status}`,
+      }));
+      throw new ApiRequestError(response.status, error);
+    }
+
+    return response.json();
+  }
+
+  async getPublicLetters(): Promise<LetterResponse[]> {
+    return this.request<LetterResponse[]>("/api/letters/feed/public");
   }
 }
 

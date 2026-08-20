@@ -161,6 +161,13 @@
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
+
+  /* TipTap and public board rich text styles */
+  .ProseMirror p, .rich-text p { margin-bottom: 1rem; }
+  .ProseMirror h2, .rich-text h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; margin-top: 1.5rem; color: var(--accent-text); }
+  .ProseMirror ul, .rich-text ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+  .ProseMirror ol, .rich-text ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+  .ProseMirror s, .rich-text s { text-decoration: line-through; }
 }
 
 /* Prata ships a single weight; never let the browser synthesise a bolder one. */
