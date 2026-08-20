@@ -26,6 +26,7 @@ export default function RichTextEditor({ content, onChange, placeholder, classNa
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: `ProseMirror focus:outline-none w-full text-base leading-[32px] text-ink ${focusMode ? "min-h-0" : "min-h-[300px] sm:min-h-[380px]"}`,
