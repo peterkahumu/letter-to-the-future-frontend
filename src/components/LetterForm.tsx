@@ -50,10 +50,11 @@ function getRandomDateInMonths(minMonths: number, maxMonths: number): string {
   return dateInMonths(months);
 }
 
-function getTomorrowDate(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return toISODate(d);
+// The backend validates deliver_at against the current *UTC* date, so the
+// floor here must be UTC today too — otherwise a user west of UTC could pick
+// their local today, send a UTC-yesterday date, and get a 422.
+function getEarliestDate(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 const railFieldClasses =
@@ -145,8 +146,8 @@ export default function LetterForm() {
 
     if (!form.deliver_at) {
       newErrors.deliver_at = "Please choose a delivery date.";
-    } else if (form.deliver_at < getTomorrowDate()) {
-      newErrors.deliver_at = "Delivery date must be in the future.";
+    } else if (form.deliver_at < getEarliestDate()) {
+      newErrors.deliver_at = "Delivery date cannot be in the past.";
     }
 
     setErrors(newErrors);
@@ -351,7 +352,7 @@ export default function LetterForm() {
               setSurpriseLabel("");
               updateField("deliver_at", e.target.value);
             }}
-            min={getTomorrowDate()}
+            min={getEarliestDate()}
             className={`${railFieldClasses} mt-2`}
           />
           {errors.deliver_at && (
