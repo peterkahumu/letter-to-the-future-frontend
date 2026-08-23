@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Prata, Rubik } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider, themeInitScript } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PaperBackground from "@/components/PaperBackground";
@@ -48,10 +47,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#05100f" },
-  ],
+  // Dark-only app: one colour for the browser chrome, regardless of what
+  // the device prefers.
+  themeColor: "#050f0e",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -62,15 +60,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Scroll reveals start hidden and are shown by an observer. Without
+            JS that observer never runs, so opt out of the whole effect. */}
+        <noscript>
+          <style>{`.reveal{opacity:1}.animate-stamp{opacity:1}`}</style>
+        </noscript>
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink">
-        <ThemeProvider>
-          <PaperBackground />
-          <Navbar />
-          <main className="relative z-10 flex-1">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        <PaperBackground />
+        <Navbar />
+        <main className="relative z-10 flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

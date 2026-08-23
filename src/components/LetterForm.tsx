@@ -7,6 +7,7 @@ import { api, ApiRequestError, type LetterPayload } from "@/lib/api";
 import {
   ArrowRightIcon,
   CollapseIcon,
+  EnvelopeIcon,
   ExpandIcon,
   LockIcon,
 } from "@/components/icons";
@@ -389,9 +390,14 @@ export default function LetterForm() {
             onChange={(e) => updateField("recipient_email", e.target.value)}
             className={`${railFieldClasses} mt-3`}
           />
-          {errors.recipient_email && (
+          {errors.recipient_email ? (
             <p role="alert" className="mt-1.5 text-sm text-danger">
               {errors.recipient_email}
+            </p>
+          ) : (
+            <p className="mt-2 text-xs leading-relaxed text-ink-muted">
+              This address gets a confirmation email first. The letter is only
+              scheduled once that link is opened.
             </p>
           )}
 
@@ -465,10 +471,18 @@ export default function LetterForm() {
             )}
           </button>
 
-          <p className="mt-4 flex items-start gap-2.5 text-sm text-ink-muted">
-            <LockIcon className="mt-0.5 h-4 w-4 shrink-0" />
-            Stored privately and sent only to the address above.
-          </p>
+          <div className="mt-4 space-y-2.5 text-sm text-ink-muted">
+            <p className="flex items-start gap-2.5">
+              <EnvelopeIcon className="mt-0.5 h-4 w-4 shrink-0" />
+              Nothing is scheduled until the recipient confirms. They’ll get one
+              email now, and the letter itself on the day you chose.
+            </p>
+            <p className="flex items-start gap-2.5">
+              <LockIcon className="mt-0.5 h-4 w-4 shrink-0" />
+              Stored privately, sent only to the address above, and cancellable
+              from your own link until the moment it goes.
+            </p>
+          </div>
         </div>
       </aside>
     </form>

@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
-/* Design tokens: light theme is the default palette. */
+/* Design tokens. The app is dark-only: one palette, no light variant and no
+   data-theme switching. Every ink and accent role below clears 4.5:1 against
+   paper, surface and elevated; line-strong clears 3:1 for large numerals and
+   heavy borders. */
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   /* Turquoise ramp */
   --turquoise-50: #ecfbf8;
@@ -16,46 +19,59 @@
   --turquoise-800: #0a544e;
   --turquoise-900: #08403c;
 
-  /* Surfaces */
-  --paper: #ffffff;
-  --surface: #f3f8f7;
-  --elevated: #ffffff;
-  --tint: #e7f5f2;
+  /* Surfaces, deepest first. The steps between them are wide enough to read
+     as separate planes without any border. */
+  --paper: #050f0e;
+  --surface: #0a1a18;
+  --elevated: #112825;
+  --tint: #143833;
 
   /* Text */
-  --ink: #062522;
-  --ink-soft: #375855;
-  --ink-muted: #587572;
+  --ink: #f2fbf9;
+  --ink-soft: #c6dcd8;
+  --ink-muted: #9db6b2;
 
   /* Lines */
-  --line: #d2e2df;
-  --line-strong: #a8c3be;
+  --line: #22423d;
+  --line-strong: #487f77;
 
-  /* Accent roles. accent-display is lighter and reserved for large headings,
-     where 3:1 is the contrast floor; accent-text is safe at any size. */
-  --accent: #0a7d73;
-  --accent-hover: #085f58;
-  --accent-on: #ffffff;
-  --accent-text: #07665f;
-  --accent-display: #0d9488;
+  /* Accent roles. accent-text and accent-display are the bright end, safe on
+     every surface; accent is the fill that accent-on sits against. */
+  --accent: #2dd4bf;
+  --accent-hover: #7cf0dd;
+  --accent-on: #04201d;
+  --accent-text: #6feadb;
+  --accent-display: #7cf0dd;
 
-  /* Inverted panel used for the closing call to action */
-  --panel: #065a55;
-  --panel-ink: #eafaf7;
-  --panel-ink-soft: #c3e5df;
-  --panel-line: #2c6f67;
-  --panel-btn: #ffffff;
-  --panel-btn-ink: #07665f;
+  /* Postal gold — postmarks, stamps, dates. The one warm note against all
+     the turquoise, and the reason the palette doesn't read as monochrome. */
+  --stamp: #f0c04a;
+  --stamp-soft: #c99a2f;
+
+  /* Raised panel used for the closing call to action */
+  --panel: #0a2926;
+  --panel-ink: #eefaf8;
+  --panel-ink-soft: #b8d6d1;
+  --panel-line: #2a615b;
+  --panel-btn: #2dd4bf;
+  --panel-btn-ink: #04201d;
+
+  /* Scrims. Not derived from --ink: on a dark palette the ink is nearly
+     white, so an ink-based overlay would wash the page out instead of
+     dimming it. */
+  --scrim: rgba(0, 0, 0, 0.66);
+  --scrim-soft: rgba(0, 0, 0, 0.35);
 
   /* Feedback */
-  --danger: #b3261e;
-  --danger-tint: #fdecea;
-  --danger-line: #f0bfbb;
+  --danger: #ffa39b;
+  --danger-tint: #3a1512;
+  --danger-line: #7a2f29;
 
-  /* Elevation */
-  --shadow-sm: 0 1px 2px rgba(6, 37, 34, 0.06);
-  --shadow-md: 0 6px 18px -6px rgba(6, 37, 34, 0.14);
-  --shadow-lg: 0 24px 48px -24px rgba(6, 37, 34, 0.28);
+  /* Elevation. Shadows do little on a dark ground, so they stay deep and
+     are backed up by the surface steps above. */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 6px 18px -6px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 24px 48px -24px rgba(0, 0, 0, 0.85);
 
   /* Radii */
   --radius-sm: 6px;
@@ -67,43 +83,6 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 140ms;
   --duration-normal: 240ms;
-}
-
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  --paper: #05100f;
-  --surface: #0b1a19;
-  --elevated: #102422;
-  --tint: #10312d;
-
-  --ink: #e9f5f3;
-  --ink-soft: #b3c9c6;
-  --ink-muted: #8fa9a6;
-
-  --line: #1d3936;
-  --line-strong: #2a5450;
-
-  --accent: #2dd4bf;
-  --accent-hover: #6ee7d5;
-  --accent-on: #04201d;
-  --accent-text: #5eead4;
-  --accent-display: #5eead4;
-
-  --panel: #0b2b28;
-  --panel-ink: #e9f5f3;
-  --panel-ink-soft: #a9c6c1;
-  --panel-line: #23514c;
-  --panel-btn: #2dd4bf;
-  --panel-btn-ink: #04201d;
-
-  --danger: #ff9a92;
-  --danger-tint: #3a1512;
-  --danger-line: #6b2a25;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 24px 48px -24px rgba(0, 0, 0, 0.8);
 }
 
 /* Tailwind v4 theme bridge */
@@ -132,6 +111,9 @@
   --color-panel-line: var(--panel-line);
   --color-panel-btn: var(--panel-btn);
   --color-panel-btn-ink: var(--panel-btn-ink);
+
+  --color-stamp: var(--stamp);
+  --color-stamp-soft: var(--stamp-soft);
 
   --color-danger: var(--danger);
   --color-danger-tint: var(--danger-tint);
@@ -306,10 +288,50 @@
   animation: seal-draw 2s var(--ease-out) 0.8s forwards;
 }
 
+/* Scroll-triggered reveal. Hidden until Reveal adds .is-visible, then it
+   runs the same rise as everything above the fold. The reduced-motion block
+   at the end of this file collapses the animation, leaving it simply
+   visible. */
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: rise 0.6s var(--ease-out) both;
+}
+
+/* Postmark that settles into place beside the closing panel. */
+@keyframes stamp-in {
+  from {
+    opacity: 0;
+    transform: rotate(-14deg) scale(1.3);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
+.animate-stamp.is-visible {
+  animation: stamp-in 0.7s var(--ease-out) both;
+}
+
+.animate-stamp {
+  opacity: 0;
+}
+
+/* Fixed-height excerpt in a feed card, faded out at the cut rather than
+   ending on a hard crop. */
+.excerpt-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 60%, transparent 100%);
+}
+
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
 
 ::selection {
   background: var(--accent);
@@ -334,8 +356,8 @@
   background: var(--accent);
 }
 
-/* The native date picker indicator is near-invisible on the dark palette. */
-[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+/* The native date picker indicator is near-invisible on this palette. */
+input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1) opacity(0.7);
 }
 

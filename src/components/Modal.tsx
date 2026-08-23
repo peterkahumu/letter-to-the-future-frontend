@@ -7,6 +7,8 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   description?: string;
+  /** "lg" is for reading a letter; "md" suits short forms. */
+  size?: "md" | "lg";
   children: React.ReactNode;
 }
 
@@ -19,6 +21,7 @@ export default function Modal({
   onClose,
   title,
   description,
+  size = "md",
   children,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -74,8 +77,10 @@ export default function Modal({
   if (!open) return null;
 
   return (
+    // z-60 keeps the sheet above the sticky navbar (z-50), which used to crop
+    // the top of a tall dialog on phones.
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-5"
+      className="fixed inset-0 z-60 flex items-end justify-center bg-[var(--scrim)] p-0 backdrop-blur-[2px] sm:items-center sm:p-5"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -86,20 +91,28 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         aria-describedby={description ? "modal-description" : undefined}
-        className="animate-rise w-full max-w-md rounded-t-[var(--radius-lg)] border border-line bg-elevated p-6 shadow-[var(--shadow-md)] sm:rounded-[var(--radius-lg)]"
+        className={`animate-rise flex max-h-[88dvh] w-full flex-col rounded-t-[var(--radius-lg)] border border-line bg-elevated shadow-[var(--shadow-md)] sm:max-h-[85dvh] sm:rounded-[var(--radius-lg)] ${
+          size === "lg" ? "max-w-2xl" : "max-w-md"
+        }`}
       >
-        <h2
-          id="modal-title"
-          className="font-display text-2xl leading-tight text-ink"
-        >
-          {title}
-        </h2>
-        {description && (
-          <p id="modal-description" className="mt-2 text-sm leading-relaxed text-ink-soft">
-            {description}
-          </p>
-        )}
-        <div className="mt-5">{children}</div>
+        <div className="shrink-0 px-6 pt-6">
+          <h2
+            id="modal-title"
+            className="font-display text-2xl leading-tight text-ink"
+          >
+            {title}
+          </h2>
+          {description && (
+            <p id="modal-description" className="mt-2 text-sm leading-relaxed text-ink-soft">
+              {description}
+            </p>
+          )}
+        </div>
+        {/* The body scrolls, so the title stays put and nothing is pushed
+            off-screen behind the header on short viewports. */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-5">
+          {children}
+        </div>
       </div>
     </div>
   );

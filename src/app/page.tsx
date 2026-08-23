@@ -1,9 +1,12 @@
 import Link from "next/link";
 import LetterCard from "@/components/LetterCard";
 import PointerGlow from "@/components/PointerGlow";
+import Reveal from "@/components/Reveal";
 import {
   ArrowRightIcon,
   CalendarIcon,
+  ClockIcon,
+  EnvelopeIcon,
   InboxIcon,
   LockIcon,
   PenIcon,
@@ -12,21 +15,45 @@ import {
 const steps = [
   {
     Icon: PenIcon,
-    title: "Write your letter",
+    title: "Write it",
     description:
-      "Set down the thoughts, goals and promises that matter to you right now — as long or as short as you like.",
+      "Set down what today actually feels like — the goals, the worries, the promises. Add a photo, a voice note or a video if words aren't enough.",
   },
   {
-    Icon: CalendarIcon,
-    title: "Choose the date",
+    Icon: EnvelopeIcon,
+    title: "Confirm the address",
     description:
-      "Next month, next year, or a decade from now. Your letter waits, sealed, until the day arrives.",
+      "We email the address you chose and wait. Nothing is scheduled until that link is opened, so a letter can never arrive uninvited.",
+  },
+  {
+    Icon: ClockIcon,
+    title: "It waits, sealed",
+    description:
+      "Months or years, however far out you picked. You keep a private link to check on it — or call it back — any time before it goes.",
   },
   {
     Icon: InboxIcon,
-    title: "Receive it",
+    title: "It arrives",
     description:
-      "On the morning you picked, it lands in your inbox exactly as you wrote it. Nothing added, nothing lost.",
+      "On the morning you chose, word for word, exactly as you left it. Afterwards you can share it to the Public Board, or keep it to yourself.",
+  },
+];
+
+const reassurances = [
+  {
+    Icon: CalendarIcon,
+    title: "Cancel until the day it sends",
+    body: "The link we email you cancels the letter outright, no account needed.",
+  },
+  {
+    Icon: LockIcon,
+    title: "Your address stays yours",
+    body: "Only used to deliver this letter. Never shown on the board, never sold.",
+  },
+  {
+    Icon: EnvelopeIcon,
+    title: "Sharing is optional, and later",
+    body: "A letter only reaches the Public Board if you asked it to — and never before it's been delivered.",
   },
 ];
 
@@ -68,6 +95,11 @@ export default function HomePage() {
                 How it works
               </a>
             </div>
+
+            <p className="animate-rise delay-400 mt-6 text-sm text-ink-muted">
+              Free, no account. The recipient confirms before anything is
+              scheduled.
+            </p>
           </div>
 
           <div className="animate-rise delay-400">
@@ -82,38 +114,71 @@ export default function HomePage() {
         className="scroll-mt-16 border-y border-line bg-surface"
       >
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-          <div className="max-w-2xl">
+          <Reveal className="max-w-2xl">
             <p className="eyebrow">How it works</p>
             <h2 className="mt-4 font-display text-3xl leading-tight text-ink sm:text-4xl">
-              Three steps, then time does the rest.
+              Four steps, then time does the rest.
             </h2>
-          </div>
+            <p className="mt-4 text-lg leading-relaxed text-ink-soft">
+              The second step is the one people don’t expect, and it’s the one
+              that matters most.
+            </p>
+          </Reveal>
 
-          <ol className="mt-12 grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-3">
+          <ol className="mt-14 grid gap-10 sm:grid-cols-2 sm:gap-x-8 lg:grid-cols-4">
             {steps.map(({ Icon, title, description }, i) => (
-              <li
-                key={title}
-                className="group bg-paper p-7 transition-colors duration-300 hover:bg-elevated sm:p-8"
-              >
-                <div className="flex items-center justify-between">
-                  <Icon className="h-6 w-6 text-accent-text" />
-                  <span className="font-display text-2xl text-line-strong transition-colors duration-300 group-hover:text-accent-display">
+              <Reveal key={title} as="li" delay={(i * 100) as 0 | 100 | 200 | 300}>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-full)] border border-line-strong bg-elevated text-accent-text">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="font-display text-2xl text-line-strong">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <h3 className="mt-6 font-display text-xl text-ink">{title}</h3>
-                <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
+                <h3 className="mt-5 font-display text-xl text-ink">{title}</h3>
+                <p className="mt-2.5 text-[0.95rem] leading-relaxed text-ink-soft">
                   {description}
                 </p>
-              </li>
+              </Reveal>
             ))}
           </ol>
         </div>
       </section>
 
+      {/* What you keep control of */}
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+        <div className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-3">
+          {reassurances.map(({ Icon, title, body }, i) => (
+            <Reveal
+              key={title}
+              delay={(i * 100) as 0 | 100 | 200}
+              className="bg-paper p-7"
+            >
+              <Icon className="h-5 w-5 text-accent-text" />
+              <h3 className="mt-4 text-base font-medium text-ink">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">{body}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
       {/* Closing call to action */}
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
-        <div className="panel rounded-[var(--radius-lg)] px-7 py-14 text-center text-panel-ink sm:px-14 sm:py-20">
+      <section className="mx-auto max-w-6xl px-5 pb-16 sm:px-8 sm:pb-24">
+        <Reveal className="panel relative rounded-[var(--radius-lg)] px-7 py-14 text-center text-panel-ink sm:px-14 sm:py-20">
+          <Reveal
+            as="span"
+            effect="animate-stamp"
+            aria-hidden="true"
+            className="absolute right-6 top-6 hidden h-20 w-20 rotate-[-6deg] items-center justify-center rounded-[var(--radius-sm)] border-2 border-dashed border-stamp-soft text-center font-display text-[0.65rem] uppercase leading-tight tracking-widest text-stamp sm:flex"
+          >
+            Post
+            <br />
+            marked
+            <br />
+            today
+          </Reveal>
+
           <h2 className="mx-auto max-w-2xl font-display text-3xl leading-tight sm:text-[2.75rem]">
             Your future self is waiting to hear from you.
           </h2>
@@ -134,7 +199,7 @@ export default function HomePage() {
             <LockIcon className="h-4 w-4 shrink-0" />
             Stored privately and sent only to the address you give us.
           </p>
-        </div>
+        </Reveal>
       </section>
     </>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LetterForm from "@/components/LetterForm";
+import { EnvelopeIcon } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Compose",
@@ -18,6 +19,15 @@ export default function ComposePage() {
         <p className="mt-4 text-lg leading-relaxed text-ink-soft">
           Write it, pick when it lands, send it. Nobody reads this but the
           person you’ll be on the day it arrives.
+        </p>
+        <p className="mt-4 flex items-start gap-2.5 rounded-[var(--radius-md)] border border-line bg-surface/60 px-4 py-3 text-sm leading-relaxed text-ink-soft">
+          <EnvelopeIcon className="mt-0.5 h-4 w-4 shrink-0 text-accent-text" />
+          <span>
+            One thing to know: we email the recipient to confirm before
+            anything is scheduled. Until they open that link, the letter sits
+            unsent — and you can cancel it at any point before the delivery
+            date.
+          </span>
         </p>
       </header>
 
