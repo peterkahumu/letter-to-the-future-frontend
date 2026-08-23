@@ -3,9 +3,15 @@
 export const runtime = 'edge';
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, type LetterStatusResponse } from "@/lib/api";
+import {
+  api,
+  ApiRequestError,
+  type LetterStatus,
+  type LetterStatusResponse,
+} from "@/lib/api";
+import Modal from "@/components/Modal";
 import {
   ArrowRightIcon,
   CalendarIcon,
@@ -13,6 +19,43 @@ import {
   InboxIcon,
   PenIcon,
 } from "@/components/icons";
+
+// A letter is only worth cancelling while it can still be stopped.
+const CANCELLABLE: LetterStatus[] = ["pending", "scheduled"];
+
+const STATUS_COPY: Record<
+  LetterStatus,
+  { eyebrow: string; heading: string; blurb: string }
+> = {
+  pending: {
+    eyebrow: "Awaiting confirmation",
+    heading: "Check your inbox.",
+    blurb:
+      "We've emailed a confirmation link. The letter is scheduled the moment you click it — until then, nothing is sent.",
+  },
+  scheduled: {
+    eyebrow: "Sealed",
+    heading: "Your letter is on its way.",
+    blurb:
+      "It's stored safely and will be delivered on the date you chose. You can close this page — nothing else is needed.",
+  },
+  sent: {
+    eyebrow: "Delivered",
+    heading: "Your letter has arrived.",
+    blurb: "It was delivered to the inbox you chose. Time to read it.",
+  },
+  failed: {
+    eyebrow: "Undelivered",
+    heading: "We couldn't deliver this letter.",
+    blurb:
+      "We tried several times and the address wouldn't accept it. Write it again to a different address.",
+  },
+  cancelled: {
+    eyebrow: "Cancelled",
+    heading: "This letter won't be sent.",
+    blurb: "It's been withdrawn and will never be delivered.",
+  },
+};
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -37,19 +80,48 @@ function countdownLabel(days: number): string {
 
 export default function ConfirmationPage() {
   const params = useParams<{ id: string }>();
+  const search = useSearchParams();
+  // Present only when arriving from the emailed manage link. It is what
+  // authorises cancelling — there are no accounts.
+  const manageToken = search.get("token");
+
   const [letter, setLetter] = useState<LetterStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   useEffect(() => {
     if (!params.id) return;
 
     api
-      .getLetterStatus(params.id)
+      .getLetterStatus(params.id, manageToken ?? undefined)
       .then(setLetter)
       .catch(() => setError("Letter not found."))
       .finally(() => setLoading(false));
-  }, [params.id]);
+  }, [params.id, manageToken]);
+
+  const handleCancel = async () => {
+    if (!params.id || !manageToken) return;
+
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await api.cancelLetter(params.id, manageToken);
+      const fresh = await api.getLetterStatus(params.id, manageToken);
+      setLetter(fresh);
+      setConfirmingCancel(false);
+    } catch (err) {
+      setCancelError(
+        err instanceof ApiRequestError
+          ? err.message
+          : "Couldn't cancel the letter. Please try again."
+      );
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -83,7 +155,7 @@ export default function ConfirmationPage() {
   const days = daysUntil(letter.deliver_at);
 
   const details = [
-    { Icon: InboxIcon, label: "Delivering to", value: letter.recipient_email },
+    { Icon: InboxIcon, label: "Delivering to", value: letter.recipient_email_masked },
     {
       Icon: CalendarIcon,
       label: "Delivery date",
@@ -98,16 +170,15 @@ export default function ConfirmationPage() {
       <header className="animate-rise flex items-start gap-5">
         <SealMark />
         <div>
-          <p className="eyebrow">Sealed</p>
+          <p className="eyebrow">{STATUS_COPY[letter.status].eyebrow}</p>
           <h1 className="mt-3 font-display text-3xl leading-tight text-ink sm:text-4xl">
-            Your letter is on its way.
+            {STATUS_COPY[letter.status].heading}
           </h1>
         </div>
       </header>
 
       <p className="animate-rise delay-100 mt-6 max-w-lg text-lg leading-relaxed text-ink-soft">
-        It’s stored safely and will be delivered on the date you chose. You can
-        close this page — nothing else is needed.
+        {STATUS_COPY[letter.status].blurb}
       </p>
 
       <dl className="animate-rise delay-200 mt-10 overflow-hidden rounded-[var(--radius-lg)] border border-line bg-elevated shadow-[var(--shadow-md)]">
@@ -128,6 +199,49 @@ export default function ConfirmationPage() {
           </div>
         ))}
       </dl>
+
+      {manageToken && CANCELLABLE.includes(letter.status) && (
+        <div className="animate-fade delay-300 mt-8">
+          <button
+            type="button"
+            onClick={() => setConfirmingCancel(true)}
+            disabled={cancelling}
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line px-5 text-sm font-medium text-ink transition-colors duration-200 hover:border-danger hover:text-danger disabled:opacity-60"
+          >
+            {cancelling ? "Cancelling…" : "Cancel this letter"}
+          </button>
+        </div>
+      )}
+
+      <Modal
+        open={confirmingCancel}
+        onClose={() => setConfirmingCancel(false)}
+        title="Cancel this letter?"
+        description="It won't be delivered, and this can't be undone. The letter itself stays readable here."
+      >
+        {cancelError && (
+          <p role="alert" className="mb-3 text-sm text-danger">
+            {cancelError}
+          </p>
+        )}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={() => setConfirmingCancel(false)}
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line px-5 text-base font-medium text-ink transition-colors duration-200 hover:border-line-strong"
+          >
+            Keep it scheduled
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={cancelling}
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] bg-danger px-5 text-base font-medium text-paper transition-opacity duration-200 hover:opacity-90 disabled:opacity-50"
+          >
+            {cancelling ? "Cancelling…" : "Cancel the letter"}
+          </button>
+        </div>
+      </Modal>
 
       <div className="animate-fade delay-300 mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
         <Link

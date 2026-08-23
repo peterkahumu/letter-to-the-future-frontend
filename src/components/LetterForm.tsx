@@ -11,7 +11,12 @@ import {
   LockIcon,
 } from "@/components/icons";
 import RichTextEditor from "./RichTextEditor";
-import { Paperclip, Loader2, Image as ImageIcon } from "lucide-react";
+import { Paperclip, Loader2 } from "lucide-react";
+import {
+  MediaIcon,
+  mediaLabel,
+  resolveKind,
+} from "@/components/MediaAttachment";
 
 interface FormErrors {
   recipient_email?: string;
@@ -50,11 +55,10 @@ function getRandomDateInMonths(minMonths: number, maxMonths: number): string {
   return dateInMonths(months);
 }
 
-// The backend validates deliver_at against the current *UTC* date, so the
-// floor here must be UTC today too — otherwise a user west of UTC could pick
-// their local today, send a UTC-yesterday date, and get a 422.
+// Delivery is evaluated in the writer's own timezone, which is the same zone
+// this date is picked in — so the floor is simply local today.
 function getEarliestDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toISODate(new Date());
 }
 
 const railFieldClasses =
@@ -79,6 +83,9 @@ export default function LetterForm() {
     is_public: false,
     is_anonymous: true,
     media_url: null,
+    media_type: null,
+    // Replaced with the browser's real zone at submit time.
+    timezone_name: "UTC",
   });
 
   const [surpriseLabel, setSurpriseLabel] = useState("");
@@ -115,8 +122,11 @@ export default function LetterForm() {
 
     setIsUploading(true);
     try {
-      const { url } = await api.uploadMedia(file);
+      const { url, media_type } = await api.uploadMedia(file);
       updateField("media_url", url);
+      // Recorded so the letter renders as audio/video/image rather than
+      // always as an image.
+      updateField("media_type", media_type);
     } catch (err) {
       setErrors({ ...errors, general: "Failed to upload file. Please try again." });
     } finally {
@@ -168,6 +178,10 @@ export default function LetterForm() {
       const payload: LetterPayload = {
         ...form,
         sender_name: form.sender_name.trim() || "Past You",
+        // Delivery fires at local midnight in the zone the date was picked
+        // in, so a date chosen here means that date here.
+        timezone_name:
+          Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
       };
       const response = await api.createLetter(payload);
       router.push(`/confirmation/${response.id}`);
@@ -265,7 +279,8 @@ export default function LetterForm() {
             
             {!isUploading && form.media_url && (
               <span className="flex items-center gap-1.5 text-sm text-ink-soft bg-surface px-3 py-1.5 rounded-full">
-                <ImageIcon size={14} /> Attached
+                <MediaIcon kind={resolveKind(form.media_type, form.media_url)} />
+                {mediaLabel(resolveKind(form.media_type, form.media_url))}
               </span>
             )}
           </div>
