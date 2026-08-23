@@ -1,76 +1,107 @@
-# Letter to the Future - Frontend ✉️
+# Letter to the Future — Frontend ✉️
 
-This is the frontend component for the "Letter to the Future" application. It is built with Next.js 16 and Tailwind CSS v4.
+Next.js app for [Letter to the Future](https://github.com/peterkahumu/letter-to-the-future-backend):
+write a letter, pick a delivery date, and it arrives by email when the time comes.
 
-**Backend Repository:** [letter-to-the-future-backend](https://github.com/peterkahumu/letter-to-the-future-backend)
+**Backend repository:** [letter-to-the-future-backend](https://github.com/peterkahumu/letter-to-the-future-backend)
 
-## Getting Started
+## Stack
 
-First, install the dependencies:
+| Piece | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS v4 |
+| Editor | Tiptap (rich text) |
+| Icons | lucide-react |
+| Sanitising | DOMPurify (client side; the API sanitises again on write) |
+| Hosting | Cloudflare Pages |
+
+## Getting started
+
 ```bash
 npm install
-```
 
-Copy and configure your environment variables:
-```bash
-cp .env.example .env.local
-# Edit .env.local with your backend API URL if different from the default
-```
-
-Run the development server:
-```bash
+cp .env.example .env.local   # point at your backend
 npm run dev
-# or
-yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>. The backend needs to be running too — see the
+backend README.
 
-## Docker Compose
+### Scripts
 
-If you'd like to run both the frontend and backend together using Docker, you can use the following `docker-compose.yml` configuration (assuming both repositories are cloned in the same parent directory):
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server with hot reload |
+| `npm run build` | Production build |
+| `npm start` | Serve the production build |
+| `npm run lint` | ESLint |
 
-<details>
-<summary>Click to expand <code>docker-compose.yml</code></summary>
+## Configuration
 
-```yaml
-services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: lttf-backend
-    ports:
-      - "8000:8000"
-    env_file:
-      - ./backend/.env
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    restart: unless-stopped
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_API_URL` | Base URL of the backend API |
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: lttf-frontend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./frontend/.env.local
-    depends_on:
-      backend:
-        condition: service_healthy
-    restart: unless-stopped
+`NEXT_PUBLIC_` variables are **inlined into the browser bundle at build
+time**, not read at runtime. Changing it means rebuilding, and it must never
+hold anything secret.
+
+Whatever origin this app is served from also has to be allowed by the
+backend's `FRONTEND_URL` (or `ALLOWED_ORIGIN_REGEX`), or every request fails
+CORS. Preview deploys are the usual thing to forget.
+
+## Routes
+
+| Route | Purpose |
+|---|---|
+| `/` | Landing page |
+| `/compose` | Write and schedule a letter |
+| `/confirmation/[id]` | Writer's status page — where the letter is, and cancel it while it's still stoppable |
+| `/confirm/[id]` | Where the recipient's emailed link lands; confirming schedules the letter |
+| `/public` | Feed of delivered letters their writers chose to share |
+| `/unsubscribe` | Stop all letters to an address |
+
+`/confirm/[id]` and `/unsubscribe` are reached from emailed links carrying a
+token. The backend builds those URLs from its own `FRONTEND_URL`, so that
+value has to match where this app actually lives.
+
+## Layout
+
+```
+src/
+├── app/
+│   ├── layout.tsx           # shell, theme, fonts
+│   ├── page.tsx             # landing
+│   ├── compose/             # the writing flow
+│   ├── confirm/[id]/        # recipient confirmation
+│   ├── confirmation/[id]/   # writer's "check your inbox" screen
+│   ├── public/              # public feed
+│   └── unsubscribe/
+├── components/
+│   ├── LetterForm.tsx       # the main compose form
+│   ├── RichTextEditor.tsx   # Tiptap editor
+│   ├── MediaAttachment.tsx  # upload to Cloudinary via the API
+│   ├── LetterCard.tsx       # feed item
+│   ├── ReportDialog.tsx     # report a public letter
+│   ├── Modal.tsx, Navbar.tsx, Footer.tsx
+│   ├── PaperBackground.tsx, PointerGlow.tsx   # visual treatment
+│   └── ThemeProvider.tsx    # light/dark
+└── lib/
+    └── api.ts               # every call to the backend
 ```
 
-</details>
+## Deployment
 
-## Learn More
+Cloudflare Pages, configured in `wrangler.toml`. Set `NEXT_PUBLIC_API_URL`
+in the Pages project's build environment variables — it's baked in at build
+time, so a change needs a fresh deploy, not just a restart.
 
-To learn more about Next.js, take a look at the following resources:
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+After deploying to a new URL, add that origin to the backend's
+`FRONTEND_URL` and redeploy the backend. The backend also uses the first
+entry of that list to build the links it emails, so if it's wrong,
+confirmation emails point somewhere useless.
+
+## License
+
+MIT
