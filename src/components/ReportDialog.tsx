@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/Modal";
 import { api, ApiRequestError } from "@/lib/api";
 
@@ -33,6 +33,13 @@ export default function ReportDialog({ letterId, onClose, onReported }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const doneButtonRef = useRef<HTMLButtonElement>(null);
+
+  // The submit button unmounts with the form, so move focus onto the success
+  // view's own button rather than letting it fall out of the dialog.
+  useEffect(() => {
+    if (done) doneButtonRef.current?.focus();
+  }, [done]);
 
   const close = () => {
     setReason(null);
@@ -80,6 +87,7 @@ export default function ReportDialog({ letterId, onClose, onReported }: Props) {
             it, it’s hidden from the board straight away.
           </p>
           <button
+            ref={doneButtonRef}
             type="button"
             onClick={close}
             className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-[var(--radius-sm)] bg-accent px-5 text-base font-medium text-accent-on transition-colors duration-200 hover:bg-accent-hover"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 
 interface ModalProps {
   open: boolean;
@@ -26,6 +26,10 @@ export default function Modal({
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  // An Effect Event so a caller can pass an inline onClose without it
+  // re-running the effect below on every render — that tore the focus trap
+  // down mid-keystroke and yanked focus back to the first field.
+  const requestClose = useEffectEvent(() => onClose());
 
   useEffect(() => {
     if (!open) return;
@@ -44,7 +48,7 @@ export default function Modal({
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        requestClose();
         return;
       }
       if (e.key !== "Tab") return;
@@ -72,7 +76,7 @@ export default function Modal({
       document.body.style.overflow = overflow;
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
