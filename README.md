@@ -66,6 +66,53 @@ CORS. Preview deploys are the usual thing to forget.
 token. The backend builds those URLs from its own `FRONTEND_URL`, so that
 value has to match where this app actually lives.
 
+### Accounts
+
+| Route | Purpose |
+|---|---|
+| `/login`, `/register` | Sign in or create an account |
+| `/verify-email` | Lands from the confirmation email; signs you in |
+| `/forgot-password`, `/reset-password` | Password recovery |
+
+### Signed in
+
+| Route | Purpose |
+|---|---|
+| `/dashboard` | Overview — counts, next delivery, writing streak, recent items |
+| `/dashboard/letters` | Your letters. Read-only, on purpose |
+| `/dashboard/journals` | Your notebooks |
+| `/dashboard/journals/[id]` | One notebook and its entries — write and edit here |
+| `/dashboard/settings` | Profile, password, live sessions, delete account |
+
+### Admin
+
+`/admin`, `/admin/users`, `/admin/moderation`, `/admin/delivery` — statistics,
+user management, the report queue, and delivery health. Admins are ordinary
+users with a wider role, so they keep their own dashboard too.
+
+Journals and diary entries are private to whoever wrote them. There is no
+admin screen that shows their contents, because there is no API that returns
+them.
+
+## Sessions
+
+Sign-in returns a short-lived access token and a refresh token, both held in
+`localStorage` (`lib/tokens.ts`) and sent as `Authorization: Bearer`. Any
+script running on this origin can read them, which is why the app ships no
+third-party scripts and why every letter and entry body is sanitized on the
+server before it is ever rendered.
+
+`lib/api.ts` attaches the token, and on a `401` refreshes once and replays
+the request. That refresh is **single-flight**: a dashboard fires several
+requests at once, so without sharing one in-flight refresh each 401 would
+start its own, and every attempt after the first would present a token the
+first had already rotated — which the backend correctly reads as theft and
+answers by ending every session.
+
+`RequireAuth` gates the dashboard and admin trees. It is a UX guard, not a
+security boundary: the API authorises every request independently, so
+editing your way past it yields an empty shell and a string of 401s.
+
 ## Layout
 
 ```
@@ -77,18 +124,31 @@ src/
 │   ├── confirm/[id]/        # recipient confirmation
 │   ├── confirmation/[id]/   # writer's "check your inbox" screen
 │   ├── public/              # public feed
-│   └── unsubscribe/
+│   ├── unsubscribe/
+│   ├── login/, register/    # account entry points
+│   ├── verify-email/, forgot-password/, reset-password/
+│   ├── dashboard/           # overview, letters, journals, settings
+│   └── admin/               # stats, users, moderation, delivery
 ├── components/
 │   ├── LetterForm.tsx       # the main compose form
-│   ├── RichTextEditor.tsx   # Tiptap editor
+│   ├── RichTextEditor.tsx   # Tiptap editor, shared with journal entries
 │   ├── MediaAttachment.tsx  # upload to Cloudinary via the API
 │   ├── LetterCard.tsx       # feed item
 │   ├── ReportDialog.tsx     # report a public letter
+│   ├── EntryEditor.tsx      # write or edit a diary entry
+│   ├── JournalCard.tsx      # notebook tile
+│   ├── RequireAuth.tsx      # gate for /dashboard and /admin
+│   ├── UserMenu.tsx         # account menu in the navbar
+│   ├── AuthCard.tsx, FormField.tsx, SubmitButton.tsx, Alert.tsx, StatTile.tsx
+│   ├── DashboardNav.tsx, AdminNav.tsx
 │   ├── Modal.tsx, Navbar.tsx, Footer.tsx
 │   ├── PaperBackground.tsx, PointerGlow.tsx   # visual treatment
 │   └── ThemeProvider.tsx    # light/dark
 └── lib/
-    └── api.ts               # every call to the backend
+    ├── api.ts               # every call to the backend
+    ├── auth.tsx             # session context
+    ├── tokens.ts            # where tokens live in the browser
+    └── format.ts            # shared date and status formatting
 ```
 
 ## Deployment
