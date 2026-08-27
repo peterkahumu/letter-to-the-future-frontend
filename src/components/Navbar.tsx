@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { EnvelopeIcon } from "@/components/icons";
+import UserMenu from "@/components/UserMenu";
 
 export default function Navbar() {
   return (
@@ -35,6 +36,8 @@ export default function Navbar() {
             <span className="sm:hidden">Write</span>
             <span className="hidden sm:inline">Write a letter</span>
           </Link>
+
+          <UserMenu />
         </div>
       </nav>
     </header>
