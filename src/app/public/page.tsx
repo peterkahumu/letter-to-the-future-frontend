@@ -22,11 +22,28 @@ export default function PublicBoard() {
     setCursor(page.next_cursor);
   }, []);
 
+  // The first page is fetched here rather than through `load`, so every
+  // state write happens in a promise callback and a request still in flight
+  // when the page unmounts is dropped instead of landing on nothing.
   useEffect(() => {
-    load()
+    let cancelled = false;
+
+    api
+      .getPublicLetters()
+      .then((page) => {
+        if (cancelled) return;
+        setLetters(page.items);
+        setCursor(page.next_cursor);
+      })
       .catch((e) => console.error("Failed to load public letters:", e))
-      .finally(() => setIsLoading(false));
-  }, [load]);
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const loadMore = async () => {
     if (!cursor) return;
@@ -84,7 +101,7 @@ export default function PublicBoard() {
                 type="button"
                 onClick={loadMore}
                 disabled={isLoadingMore}
-                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-sm)] border border-line px-6 text-base font-medium text-ink transition-colors duration-200 hover:border-line-strong disabled:opacity-60"
+                className="inline-flex h-12 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-6 text-base font-medium text-ink transition-colors duration-200 hover:border-line-hover disabled:opacity-60"
               >
                 {isLoadingMore ? "Loading…" : "Load more letters"}
               </button>

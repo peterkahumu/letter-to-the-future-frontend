@@ -2,18 +2,10 @@ import Link from "next/link";
 import { NotebookPen } from "lucide-react";
 import type { Journal } from "@/lib/api";
 import { formatDate } from "@/lib/format";
+import { swatchFor } from "@/lib/journalColor";
 
 /** Swatch per journal colour. Kept as a lookup rather than an interpolated
  *  class name, which Tailwind cannot see at build time and would purge. */
-const SWATCH: Record<string, string> = {
-  turquoise: "bg-[var(--turquoise-400)]",
-  gold: "bg-[var(--stamp)]",
-  rose: "bg-[#f0929a]",
-  violet: "bg-[#b49bf0]",
-  amber: "bg-[#f0b45a]",
-  slate: "bg-[#8ba3a0]",
-};
-
 export default function JournalCard({ journal }: { journal: Journal }) {
   return (
     <Link
@@ -23,7 +15,7 @@ export default function JournalCard({ journal }: { journal: Journal }) {
       <div className="flex items-start gap-3">
         <span
           className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-            SWATCH[journal.color] ?? SWATCH.turquoise
+            swatchFor(journal.color)
           }`}
           aria-hidden="true"
         />

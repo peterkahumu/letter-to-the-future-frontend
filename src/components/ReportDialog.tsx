@@ -140,7 +140,7 @@ export default function ReportDialog({ letterId, onClose, onReported }: Props) {
             onChange={(e) => setDetails(e.target.value.slice(0, 1000))}
             rows={3}
             placeholder="Add any detail that would help a moderator."
-            className="mt-2 w-full resize-y rounded-[var(--radius-sm)] border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted transition-colors duration-200 hover:border-line-strong focus:border-accent focus:outline-none"
+            className="mt-2 w-full resize-y rounded-[var(--radius-sm)] border border-line-strong bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-muted transition-colors duration-200 hover:border-line-hover focus:border-accent focus:outline-none"
           />
           <p className="mt-1 text-right text-xs text-ink-muted tabular-nums">
             {details.length}/1000
@@ -156,7 +156,7 @@ export default function ReportDialog({ letterId, onClose, onReported }: Props) {
             <button
               type="button"
               onClick={close}
-              className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line px-5 text-base font-medium text-ink transition-colors duration-200 hover:border-line-strong"
+              className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-5 text-base font-medium text-ink transition-colors duration-200 hover:border-line-hover"
             >
               Cancel
             </button>

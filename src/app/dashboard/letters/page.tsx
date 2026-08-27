@@ -85,7 +85,7 @@ export default function MyLettersPage() {
             className={`h-8 rounded-[var(--radius-full)] border px-3.5 text-xs transition-colors duration-200 ${
               filter === value
                 ? "border-accent bg-tint text-accent-text"
-                : "border-line text-ink-muted hover:border-line-strong hover:text-ink-soft"
+                : "border-line-strong text-ink-muted hover:border-line-hover hover:text-ink-soft"
             }`}
           >
             {label}

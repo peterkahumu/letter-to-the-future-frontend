@@ -91,7 +91,7 @@ export default function AdminUsersPage() {
           }}
           placeholder="Search by email or name"
           aria-label="Search users"
-          className="w-full rounded-[var(--radius-sm)] border border-line bg-surface py-2.5 pl-10 pr-3.5 text-sm text-ink placeholder:text-ink-muted"
+          className="w-full rounded-[var(--radius-sm)] border border-line-strong bg-surface py-2.5 pl-10 pr-3.5 text-sm text-ink placeholder:text-ink-muted"
         />
       </div>
 
@@ -224,7 +224,7 @@ export default function AdminUsersPage() {
             type="button"
             onClick={() => setPage((value) => Math.max(1, value - 1))}
             disabled={page === 1}
-            className="h-9 rounded-[var(--radius-sm)] border border-line px-3.5 text-sm text-ink-soft disabled:opacity-40"
+            className="h-9 rounded-[var(--radius-sm)] border border-line-strong px-3.5 text-sm text-ink-soft disabled:opacity-40"
           >
             Previous
           </button>
@@ -235,7 +235,7 @@ export default function AdminUsersPage() {
             type="button"
             onClick={() => setPage((value) => Math.min(pages, value + 1))}
             disabled={page === pages}
-            className="h-9 rounded-[var(--radius-sm)] border border-line px-3.5 text-sm text-ink-soft disabled:opacity-40"
+            className="h-9 rounded-[var(--radius-sm)] border border-line-strong px-3.5 text-sm text-ink-soft disabled:opacity-40"
           >
             Next
           </button>
@@ -263,7 +263,7 @@ export default function AdminUsersPage() {
           <button
             type="button"
             onClick={() => setPendingDelete(null)}
-            className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line text-sm text-ink-soft hover:border-line-strong hover:text-ink"
+            className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line-strong text-sm text-ink-soft hover:border-line-hover hover:text-ink"
           >
             Cancel
           </button>
@@ -300,10 +300,10 @@ function IconButton({
       disabled={disabled}
       title={label}
       aria-label={label}
-      className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-line text-ink-muted transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-30 ${
+      className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong text-ink-muted transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-30 ${
         danger
           ? "hover:border-danger-line hover:text-danger"
-          : "hover:border-line-strong hover:text-ink"
+          : "hover:border-line-hover hover:text-ink"
       }`}
     >
       {children}

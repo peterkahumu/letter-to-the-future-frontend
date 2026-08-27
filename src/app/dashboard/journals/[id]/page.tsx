@@ -3,11 +3,19 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Pencil, Plus, Search, Settings2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Pencil,
+  Plus,
+  Search,
+} from "lucide-react";
 import {
   api,
   ApiRequestError,
   JOURNAL_COLORS,
+  MOODS,
   type EntrySummary,
   type Journal,
   type JournalColor,
@@ -18,18 +26,15 @@ import Modal from "@/components/Modal";
 import FormField from "@/components/FormField";
 import SubmitButton from "@/components/SubmitButton";
 import Alert from "@/components/Alert";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDateTime, formatEntryDateTime } from "@/lib/format";
+import { swatchFor } from "@/lib/journalColor";
 
 const PAGE_SIZE = 20;
 
-const SWATCH: Record<JournalColor, string> = {
-  turquoise: "bg-[var(--turquoise-400)]",
-  gold: "bg-[var(--stamp)]",
-  rose: "bg-[#f0929a]",
-  violet: "bg-[#b49bf0]",
-  amber: "bg-[#f0b45a]",
-  slate: "bg-[#8ba3a0]",
-};
+const MOOD_FILTERS: Array<{ value: string; label: string }> = [
+  { value: "all", label: "All" },
+  ...MOODS.map((m) => ({ value: m, label: m.charAt(0).toUpperCase() + m.slice(1) })),
+];
 
 export default function JournalDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +45,7 @@ export default function JournalDetailPage() {
   const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [search, setSearch] = useState("");
+  const [moodFilter, setMoodFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -48,11 +54,12 @@ export default function JournalDetailPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const loadEntries = useCallback(
-    async (offset: number, term: string) => {
+    async (offset: number, term: string, mood: string) => {
       const page = await api.getEntries(id, {
         limit: PAGE_SIZE,
         offset,
         search: term || undefined,
+        mood: mood === "all" ? undefined : mood,
       });
       setTotal(page.total);
       setHasMore(page.has_more);
@@ -91,17 +98,18 @@ export default function JournalDetailPage() {
     };
   }, [id]);
 
-  // Debounced search — one request after typing stops, not one per keystroke.
+  // Debounced search + mood filter
   useEffect(() => {
     const timer = setTimeout(() => {
-      void loadEntries(0, search).catch(() => setError("Search failed."));
+      void loadEntries(0, search, moodFilter).catch(() =>
+        setError("Search failed.")
+      );
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, loadEntries]);
+  }, [search, moodFilter, loadEntries]);
 
   async function openForEdit(entryId: string) {
     try {
-      // The list carries excerpts, so fetch the full body to edit it.
       setEditing(await api.getEntry(entryId));
     } catch {
       setError("Couldn't open that entry.");
@@ -111,7 +119,7 @@ export default function JournalDetailPage() {
   function handleSaved() {
     setWriting(false);
     setEditing(null);
-    void loadEntries(0, search);
+    void loadEntries(0, search, moodFilter);
   }
 
   if (error && !journal) {
@@ -145,7 +153,7 @@ export default function JournalDetailPage() {
             {journal && (
               <span
                 className={`h-3 w-3 shrink-0 rounded-full ${
-                  SWATCH[journal.color] ?? SWATCH.turquoise
+                  swatchFor(journal.color)
                 }`}
                 aria-hidden="true"
               />
@@ -163,15 +171,6 @@ export default function JournalDetailPage() {
         </div>
 
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            disabled={!journal}
-            aria-label="Journal settings"
-            className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] border border-line text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink disabled:opacity-50"
-          >
-            <Settings2 className="h-4 w-4" aria-hidden="true" />
-          </button>
           <button
             type="button"
             onClick={() => setWriting(true)}
@@ -196,8 +195,31 @@ export default function JournalDetailPage() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search this journal"
           aria-label="Search entries"
-          className="w-full rounded-[var(--radius-sm)] border border-line bg-surface py-2.5 pl-10 pr-3.5 text-sm text-ink placeholder:text-ink-muted"
+          className="w-full rounded-[var(--radius-sm)] border border-line-strong bg-surface py-2.5 pl-10 pr-3.5 text-sm text-ink placeholder:text-ink-muted"
         />
+      </div>
+
+      {/* Mood filter pills */}
+      <div
+        className="flex flex-wrap gap-1.5"
+        role="group"
+        aria-label="Filter by mood"
+      >
+        {MOOD_FILTERS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setMoodFilter(value)}
+            aria-pressed={moodFilter === value}
+            className={`h-7 rounded-[var(--radius-full)] border px-3 text-xs transition-colors duration-200 ${
+              moodFilter === value
+                ? "border-accent bg-tint text-accent-text"
+                : "border-line-strong text-ink-muted hover:border-line-hover hover:text-ink-soft"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {loading ? (
@@ -212,9 +234,11 @@ export default function JournalDetailPage() {
       ) : entries.length === 0 ? (
         <div className="rounded-[var(--radius-md)] border border-dashed border-line bg-surface/50 p-12 text-center">
           <p className="text-sm text-ink">
-            {search ? "Nothing matches that." : "This journal is empty."}
+            {search || moodFilter !== "all"
+              ? "Nothing matches that."
+              : "This journal is empty."}
           </p>
-          {!search && (
+          {!search && moodFilter === "all" && (
             <button
               type="button"
               onClick={() => setWriting(true)}
@@ -232,7 +256,7 @@ export default function JournalDetailPage() {
                 <button
                   type="button"
                   onClick={() => void openForEdit(entry.id)}
-                  className="group w-full rounded-[var(--radius-md)] border border-line bg-surface p-4 text-left transition-colors duration-200 hover:border-line-strong sm:p-5"
+                  className="group w-full rounded-[var(--radius-md)] border border-line-strong bg-surface p-4 text-left transition-colors duration-200 hover:border-line-hover sm:p-5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="min-w-0 flex-1 truncate text-sm text-ink sm:text-base">
@@ -256,7 +280,7 @@ export default function JournalDetailPage() {
                   </p>
 
                   <p className="mt-2.5 text-[11px] text-ink-muted">
-                    {formatDate(entry.entry_date)}
+                    {formatEntryDateTime(entry.entry_date, entry.entry_time)}
                     {entry.updated_at !== entry.entry_date && (
                       <span> · edited {formatDateTime(entry.updated_at)}</span>
                     )}
@@ -269,13 +293,44 @@ export default function JournalDetailPage() {
           {hasMore && (
             <button
               type="button"
-              onClick={() => void loadEntries(entries.length, search)}
-              className="mx-auto flex h-10 items-center rounded-[var(--radius-sm)] border border-line px-5 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
+              onClick={() =>
+                void loadEntries(entries.length, search, moodFilter)
+              }
+              className="mx-auto flex h-10 items-center rounded-[var(--radius-sm)] border border-line-strong px-5 text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
             >
               Load more
             </button>
           )}
         </>
+      )}
+
+      {/* Inline journal settings — collapsible section at the bottom */}
+      {journal && (
+        <div className="border-t border-line pt-6">
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className="flex w-full items-center justify-between text-sm text-ink-muted transition-colors hover:text-ink-soft"
+          >
+            <span className="font-medium">Journal settings</span>
+            {settingsOpen ? (
+              <ChevronUp className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="h-4 w-4" aria-hidden="true" />
+            )}
+          </button>
+
+          {settingsOpen && (
+            <div className="mt-4">
+              <JournalSettings
+                journal={journal}
+                onClose={() => setSettingsOpen(false)}
+                onUpdated={setJournal}
+                onDeleted={() => router.push("/dashboard/journals")}
+              />
+            </div>
+          )}
+        </div>
       )}
 
       <Modal
@@ -293,7 +348,6 @@ export default function JournalDetailPage() {
         size="lg"
       >
         <EntryEditor
-          // Remount when switching entries, so the form resets cleanly.
           key={editing?.id ?? "new"}
           journalId={id}
           entry={editing}
@@ -305,22 +359,13 @@ export default function JournalDetailPage() {
           onDeleted={handleSaved}
         />
       </Modal>
-
-      {journal && settingsOpen && (
-        <JournalSettings
-          journal={journal}
-          onClose={() => setSettingsOpen(false)}
-          onUpdated={setJournal}
-          onDeleted={() => router.push("/dashboard/journals")}
-        />
-      )}
     </div>
   );
 }
 
 /**
- * Rendered only while open, so each visit mounts with the journal's current
- * values — no effect needed to keep the form in step with its props.
+ * Now rendered inline (not in a modal) as a collapsible settings panel
+ * at the bottom of the journal page.
  */
 function JournalSettings({
   journal,
@@ -363,7 +408,9 @@ function JournalSettings({
     setBusy(true);
     try {
       onUpdated(
-        await api.updateJournal(journal.id, { is_archived: !journal.is_archived })
+        await api.updateJournal(journal.id, {
+          is_archived: !journal.is_archived,
+        })
       );
       onClose();
     } catch {
@@ -385,84 +432,87 @@ function JournalSettings({
   }
 
   return (
-    <Modal open onClose={onClose} title="Journal settings">
-      <div className="space-y-4">
-        {error && <Alert>{error}</Alert>}
+    <div className="space-y-4 rounded-[var(--radius-md)] border border-line bg-surface p-5">
+      {error && <Alert>{error}</Alert>}
 
-        <FormField label="Title" value={title} onChange={setTitle} disabled={busy} />
-        <FormField
-          label="Description"
-          value={description}
-          onChange={setDescription}
-          required={false}
-          disabled={busy}
-        />
+      <FormField
+        label="Title"
+        value={title}
+        onChange={setTitle}
+        disabled={busy}
+      />
+      <FormField
+        label="Description"
+        value={description}
+        onChange={setDescription}
+        required={false}
+        disabled={busy}
+      />
 
-        <fieldset>
-          <legend className="mb-2 block text-sm text-ink-soft">Colour</legend>
-          <div className="flex gap-2">
-            {JOURNAL_COLORS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setColor(option)}
-                aria-label={option}
-                aria-pressed={color === option}
-                className={`h-8 w-8 rounded-full border-2 transition-colors duration-150 ${
-                  SWATCH[option]
-                } ${color === option ? "border-ink" : "border-transparent"}`}
-              />
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="flex gap-2 pt-1">
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
-          >
-            Cancel
-          </button>
-          <SubmitButton
-            type="button"
-            onClick={() => void save()}
-            busy={busy}
-            disabled={!title.trim()}
-            className="flex-1"
-          >
-            Save
-          </SubmitButton>
+      <fieldset>
+        <legend className="mb-2 block text-sm text-ink-soft">Colour</legend>
+        <div className="flex gap-2">
+          {JOURNAL_COLORS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setColor(option)}
+              aria-label={option}
+              aria-pressed={color === option}
+              className={`h-8 w-8 rounded-full border-2 transition-colors duration-150 ${
+                swatchFor(option)
+              } ${color === option ? "border-ink" : "border-transparent"}`}
+            />
+          ))}
         </div>
+      </fieldset>
 
-        <div className="space-y-2 border-t border-line pt-4">
-          <button
-            type="button"
-            onClick={() => void toggleArchive()}
-            disabled={busy}
-            className="h-10 w-full rounded-[var(--radius-sm)] border border-line text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
-          >
-            {journal.is_archived ? "Unarchive" : "Archive"} this journal
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              confirmingDelete ? void remove() : setConfirmingDelete(true)
-            }
-            disabled={busy}
-            className={`h-10 w-full rounded-[var(--radius-sm)] border text-sm transition-colors duration-200 ${
-              confirmingDelete
-                ? "border-danger-line bg-danger-tint text-danger"
-                : "border-line text-ink-muted hover:border-danger-line hover:text-danger"
-            }`}
-          >
-            {confirmingDelete
-              ? `Delete it and all ${journal.entry_count} entries?`
-              : "Delete this journal"}
-          </button>
-        </div>
+      <div className="flex gap-2 pt-1">
+        <button
+          type="button"
+          onClick={onClose}
+          className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line-strong text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
+        >
+          Cancel
+        </button>
+        <SubmitButton
+          type="button"
+          onClick={() => void save()}
+          busy={busy}
+          disabled={!title.trim()}
+          className="flex-1"
+        >
+          Save
+        </SubmitButton>
       </div>
-    </Modal>
+
+      <div className="space-y-2 border-t border-line pt-4">
+        <button
+          type="button"
+          onClick={() => void toggleArchive()}
+          disabled={busy}
+          className="h-10 w-full rounded-[var(--radius-sm)] border border-line-strong text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
+        >
+          {journal.is_archived ? "Unarchive" : "Archive"} this journal
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            confirmingDelete ? void remove() : setConfirmingDelete(true)
+          }
+          disabled={busy}
+          className={`h-10 w-full rounded-[var(--radius-sm)] border text-sm transition-colors duration-200 ${
+            confirmingDelete
+              ? "border-danger-line bg-danger-tint text-danger"
+              : "border-line-strong text-ink-muted hover:border-danger-line hover:text-danger"
+          }`}
+        >
+          {confirmingDelete
+            ? `Delete it and all ${journal.entry_count} entries?`
+            : "Delete this journal"}
+        </button>
+      </div>
+    </div>
   );
 }

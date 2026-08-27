@@ -14,15 +14,7 @@ import Modal from "@/components/Modal";
 import FormField from "@/components/FormField";
 import SubmitButton from "@/components/SubmitButton";
 import Alert from "@/components/Alert";
-
-const SWATCH: Record<JournalColor, string> = {
-  turquoise: "bg-[var(--turquoise-400)]",
-  gold: "bg-[var(--stamp)]",
-  rose: "bg-[#f0929a]",
-  violet: "bg-[#b49bf0]",
-  amber: "bg-[#f0b45a]",
-  slate: "bg-[#8ba3a0]",
-};
+import { swatchFor } from "@/lib/journalColor";
 
 export default function JournalsPage() {
   const [showArchived, setShowArchived] = useState(false);
@@ -188,7 +180,7 @@ export default function JournalsPage() {
                   aria-label={option}
                   aria-pressed={color === option}
                   className={`h-8 w-8 rounded-full border-2 transition-colors duration-150 ${
-                    SWATCH[option]
+                    swatchFor(option)
                   } ${
                     color === option ? "border-ink" : "border-transparent"
                   }`}
@@ -201,7 +193,7 @@ export default function JournalsPage() {
             <button
               type="button"
               onClick={() => setCreating(false)}
-              className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
+              className="h-11 flex-1 rounded-[var(--radius-sm)] border border-line-strong text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
             >
               Cancel
             </button>

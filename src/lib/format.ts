@@ -11,6 +11,28 @@ export function formatDate(iso: string | null): string {
   });
 }
 
+/** Format a time string like "14:30:00" → "2:30 PM" */
+export function formatTime(timeStr: string | null): string {
+  if (!timeStr) return "";
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  const d = new Date();
+  d.setHours(hours, minutes, 0, 0);
+  return d.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+/** Date with optional time: "Aug 27, 2026" or "Aug 27, 2026 at 2:30 PM" */
+export function formatEntryDateTime(
+  dateStr: string | null,
+  timeStr: string | null
+): string {
+  const d = formatDate(dateStr);
+  const t = formatTime(timeStr);
+  return t ? `${d} at ${t}` : d;
+}
+
 export function formatLongDate(iso: string | null): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString(undefined, {

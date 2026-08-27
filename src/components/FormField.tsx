@@ -55,7 +55,7 @@ export default function FormField({
         className={`w-full rounded-[var(--radius-sm)] border bg-surface px-3.5 py-2.5 text-ink
           placeholder:text-ink-muted transition-colors duration-200
           disabled:cursor-not-allowed disabled:opacity-60
-          ${error ? "border-danger-line" : "border-line hover:border-line-strong"}`}
+          ${error ? "border-danger-line" : "border-line-strong hover:border-line-hover"}`}
       />
       {error ? (
         <p id={errorId} className="text-sm text-danger">

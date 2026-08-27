@@ -20,6 +20,13 @@ function today(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
+function currentTime(): string {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
 /**
  * Write a new entry or edit an existing one.
  *
@@ -48,6 +55,7 @@ export default function EntryEditor({
   const [title, setTitle] = useState(entry?.title ?? "");
   const [body, setBody] = useState(entry?.body ?? "");
   const [entryDate, setEntryDate] = useState(entry?.entry_date ?? today());
+  const [entryTime, setEntryTime] = useState(entry?.entry_time ?? "");
   const [mood, setMood] = useState<Mood | "">(entry?.mood ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -70,12 +78,14 @@ export default function EntryEditor({
             title,
             body,
             entry_date: entryDate,
+            entry_time: entryTime || null,
             mood: mood || null,
           })
         : await api.createEntry(journalId, {
             title,
             body,
             entry_date: entryDate,
+            entry_time: entryTime || null,
             mood: mood || null,
           });
       onSaved(saved);
@@ -114,7 +124,7 @@ export default function EntryEditor({
         maxLength={300}
         disabled={busy}
         aria-label="Entry title"
-        className="w-full border-b border-line bg-transparent pb-2 font-display text-2xl text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none"
+        className="w-full border-b border-line-strong bg-transparent pb-2 font-display text-2xl text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none"
       />
 
       <div className="flex flex-wrap gap-4">
@@ -128,8 +138,46 @@ export default function EntryEditor({
             value={entryDate}
             onChange={(event) => setEntryDate(event.target.value)}
             disabled={busy}
-            className="rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2 text-sm text-ink"
+            className="rounded-[var(--radius-sm)] border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <label htmlFor="entry-time" className="block text-xs text-ink-muted">
+            Time
+          </label>
+          <div className="flex gap-1.5">
+            <input
+              id="entry-time"
+              type="time"
+              value={entryTime}
+              onChange={(event) => setEntryTime(event.target.value)}
+              disabled={busy}
+              className="rounded-[var(--radius-sm)] border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
+            />
+            {!entryTime && (
+              <button
+                type="button"
+                onClick={() => setEntryTime(currentTime())}
+                disabled={busy}
+                className="rounded-[var(--radius-sm)] border border-line-strong px-2 py-2 text-xs text-ink-muted transition-colors hover:border-line-hover hover:text-ink-soft"
+                title="Set to now"
+              >
+                Now
+              </button>
+            )}
+            {entryTime && (
+              <button
+                type="button"
+                onClick={() => setEntryTime("")}
+                disabled={busy}
+                className="rounded-[var(--radius-sm)] border border-line-strong px-2 py-2 text-xs text-ink-muted transition-colors hover:border-line-hover hover:text-ink-soft"
+                title="Clear time"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -141,7 +189,7 @@ export default function EntryEditor({
             value={mood}
             onChange={(event) => setMood(event.target.value as Mood | "")}
             disabled={busy}
-            className="rounded-[var(--radius-sm)] border border-line bg-surface px-3 py-2 text-sm text-ink"
+            className="rounded-[var(--radius-sm)] border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
           >
             <option value="">—</option>
             {MOODS.map((option) => (
@@ -170,7 +218,7 @@ export default function EntryEditor({
             className={`flex h-11 items-center gap-2 rounded-[var(--radius-sm)] border px-4 text-sm transition-colors duration-200 disabled:opacity-60 ${
               confirmingDelete
                 ? "border-danger-line bg-danger-tint text-danger"
-                : "border-line text-ink-muted hover:border-danger-line hover:text-danger"
+                : "border-line-strong text-ink-muted hover:border-danger-line hover:text-danger"
             }`}
           >
             <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -183,7 +231,7 @@ export default function EntryEditor({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="h-11 rounded-[var(--radius-sm)] border border-line px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
+            className="h-11 rounded-[var(--radius-sm)] border border-line-strong px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
           >
             Cancel
           </button>

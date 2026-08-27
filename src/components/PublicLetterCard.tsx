@@ -66,6 +66,8 @@ export default function PublicLetterCard({
       {letter.media_url && (
         <div className="shrink-0 border-b border-line bg-surface/20">
           {kind === "image" && (
+            // Cloudinary already optimises these — see MediaAttachment.
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={letter.media_url}
               alt=""

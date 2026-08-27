@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import { api, ApiRequestError, type LetterPayload } from "@/lib/api";
 import {
@@ -105,7 +105,12 @@ export default function LetterForm() {
     };
   }, [focusMode]);
 
-  const updateField = (field: keyof LetterPayload, value: any) => {
+  // Generic over the field, so the value has to match that field's own type
+  // — `any` here would have let updateField("deliver_at", true) through.
+  const updateField = <K extends keyof LetterPayload>(
+    field: K,
+    value: LetterPayload[K]
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
@@ -128,7 +133,7 @@ export default function LetterForm() {
       // Recorded so the letter renders as audio/video/image rather than
       // always as an image.
       updateField("media_type", media_type);
-    } catch (err) {
+    } catch {
       setErrors({ ...errors, general: "Failed to upload file. Please try again." });
     } finally {
       setIsUploading(false);
@@ -345,7 +350,7 @@ export default function LetterForm() {
                   className={`rounded-[var(--radius-full)] border px-3.5 py-1.5 text-sm transition-colors duration-200 ${
                     isActive
                       ? "border-accent bg-accent text-accent-on"
-                      : "border-line text-ink-soft hover:border-accent hover:text-accent-text"
+                      : "border-line-strong text-ink-soft hover:border-accent hover:text-accent-text"
                   }`}
                 >
                   {preset.label}
@@ -424,7 +429,7 @@ export default function LetterForm() {
               type="checkbox"
               checked={form.is_public}
               onChange={(e) => updateField("is_public", e.target.checked)}
-              className="mt-1 h-4 w-4 rounded border-line text-accent focus:ring-accent accent-accent"
+              className="mt-1 h-4 w-4 rounded border-line-strong text-accent focus:ring-accent accent-accent"
             />
             <div>
               <div className="font-medium text-ink text-sm">Post to Public Board</div>
@@ -439,7 +444,7 @@ export default function LetterForm() {
                   type="checkbox"
                   checked={form.is_anonymous}
                   onChange={(e) => updateField("is_anonymous", e.target.checked)}
-                  className="h-4 w-4 rounded border-line text-accent focus:ring-accent accent-accent"
+                  className="h-4 w-4 rounded border-line-strong text-accent focus:ring-accent accent-accent"
                 />
                 <span className="text-sm text-ink-soft">Post completely anonymously</span>
               </label>

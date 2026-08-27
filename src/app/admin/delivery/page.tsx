@@ -98,7 +98,7 @@ export default function DeliveryPage() {
         <button
           type="button"
           onClick={() => setReloadCount((count) => count + 1)}
-          className="flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-line px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink"
+          className="flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-line-strong px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink"
         >
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
           Refresh
@@ -117,7 +117,7 @@ export default function DeliveryPage() {
             className={`h-8 rounded-[var(--radius-full)] border px-3.5 text-xs transition-colors duration-200 ${
               tab === value
                 ? "border-accent bg-tint text-accent-text"
-                : "border-line text-ink-muted hover:border-line-strong hover:text-ink-soft"
+                : "border-line-strong text-ink-muted hover:border-line-hover hover:text-ink-soft"
             }`}
           >
             {label}
@@ -142,7 +142,7 @@ export default function DeliveryPage() {
               type="button"
               onClick={() => void retry(row.letter_id)}
               disabled={working === row.letter_id}
-              className="flex h-8 items-center gap-1.5 rounded-[var(--radius-sm)] border border-line px-3 text-xs text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink disabled:opacity-50"
+              className="flex h-8 items-center gap-1.5 rounded-[var(--radius-sm)] border border-line-strong px-3 text-xs text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink disabled:opacity-50"
             >
               <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
               Requeue
@@ -194,7 +194,7 @@ export default function DeliveryPage() {
                           type="button"
                           onClick={() => void lift(row.email)}
                           disabled={working === row.email}
-                          className="h-8 rounded-[var(--radius-sm)] border border-line px-3 text-xs text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink disabled:opacity-50"
+                          className="h-8 rounded-[var(--radius-sm)] border border-line-strong px-3 text-xs text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink disabled:opacity-50"
                         >
                           Lift
                         </button>

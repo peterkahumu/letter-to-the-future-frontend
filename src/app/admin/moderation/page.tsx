@@ -159,7 +159,7 @@ export default function ModerationPage() {
                   disabled={working === report.letter_id}
                   className={`flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border px-4 text-sm transition-colors duration-200 disabled:opacity-60 ${
                     report.is_hidden
-                      ? "border-line text-ink-soft hover:border-line-strong hover:text-ink"
+                      ? "border-line-strong text-ink-soft hover:border-line-hover hover:text-ink"
                       : "border-danger-line bg-danger-tint text-danger"
                   }`}
                 >

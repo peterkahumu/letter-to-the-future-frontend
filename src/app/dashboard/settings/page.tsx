@@ -291,7 +291,7 @@ function SessionsSection() {
             type="button"
             onClick={() => void endAll()}
             disabled={busy || sessions.length === 0}
-            className="mt-4 flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-line px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-strong hover:text-ink disabled:opacity-60"
+            className="mt-4 flex h-10 items-center gap-2 rounded-[var(--radius-sm)] border border-line-strong px-4 text-sm text-ink-soft transition-colors duration-200 hover:border-line-hover hover:text-ink disabled:opacity-60"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
             Sign out everywhere
@@ -339,7 +339,7 @@ function DangerSection({ onDeleted }: { onDeleted: () => Promise<void> }) {
         className={`h-10 rounded-[var(--radius-sm)] border px-4 text-sm transition-colors duration-200 disabled:opacity-60 ${
           confirming
             ? "border-danger-line bg-danger-tint text-danger"
-            : "border-line text-ink-muted hover:border-danger-line hover:text-danger"
+            : "border-line-strong text-ink-muted hover:border-danger-line hover:text-danger"
         }`}
       >
         {confirming ? "Yes, delete everything" : "Delete my account"}

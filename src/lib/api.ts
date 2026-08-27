@@ -171,6 +171,7 @@ export interface JournalEntry {
   title: string;
   body: string;
   entry_date: string;
+  entry_time: string | null;
   mood: Mood | null;
   created_at: string;
   updated_at: string;
@@ -184,6 +185,7 @@ export interface EntrySummary {
   title: string;
   excerpt: string;
   entry_date: string;
+  entry_time: string | null;
   mood: Mood | null;
   updated_at: string;
 }
@@ -613,13 +615,14 @@ class ApiService {
 
   async getEntries(
     journalId: string,
-    options: { limit?: number; offset?: number; search?: string } = {}
+    options: { limit?: number; offset?: number; search?: string; mood?: string } = {}
   ): Promise<EntryPage> {
     const params = new URLSearchParams({
       limit: String(options.limit ?? 20),
       offset: String(options.offset ?? 0),
     });
     if (options.search) params.set("search", options.search);
+    if (options.mood) params.set("mood", options.mood);
     return this.request<EntryPage>(`/api/journals/${journalId}/entries?${params}`);
   }
 
@@ -644,6 +647,7 @@ class ApiService {
       title?: string;
       body: string;
       entry_date?: string | null;
+      entry_time?: string | null;
       mood?: Mood | null;
     }
   ): Promise<JournalEntry> {
@@ -655,7 +659,7 @@ class ApiService {
 
   async updateEntry(
     id: string,
-    changes: { title?: string; body?: string; entry_date?: string; mood?: Mood | null }
+    changes: { title?: string; body?: string; entry_date?: string; entry_time?: string | null; mood?: Mood | null }
   ): Promise<JournalEntry> {
     return this.request<JournalEntry>(`/api/journals/entries/${id}`, {
       method: "PATCH",
