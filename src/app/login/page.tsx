@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
+import { NotebookPen } from "lucide-react";
 import { ApiRequestError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import AuthCard from "@/components/AuthCard";
@@ -41,6 +42,9 @@ function LoginForm() {
     }
   }
 
+  const next = searchParams.get("next");
+  const isJournals = next?.includes("journals");
+
   return (
     <AuthCard
       title="Welcome back"
@@ -54,6 +58,16 @@ function LoginForm() {
         </>
       }
     >
+      {isJournals && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-[var(--radius-sm)] border border-line-strong bg-tint/60 p-3 text-xs text-ink-soft">
+          <NotebookPen className="h-4 w-4 shrink-0 text-accent-text mt-0.5" aria-hidden="true" />
+          <div>
+            <strong className="text-ink font-medium">Private Journal Entries:</strong>{" "}
+            Sign in to access your personal notebooks and daily entries. Don&apos;t have an account yet? Create one below.
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {error && <Alert>{error}</Alert>}
 

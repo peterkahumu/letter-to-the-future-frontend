@@ -11,6 +11,7 @@ import {
   LockIcon,
   PenIcon,
 } from "@/components/icons";
+import { NotebookPen } from "lucide-react";
 
 const steps = [
   {
@@ -54,6 +55,11 @@ const reassurances = [
     Icon: EnvelopeIcon,
     title: "Sharing is optional, and later",
     body: "A letter only reaches the Public Board if you asked it to — and never before it's been delivered.",
+  },
+  {
+    Icon: NotebookPen,
+    title: "Private journals for members",
+    body: "Want to write daily reflections? Registered members get private, dated notebooks to revisit and rewrite anytime.",
   },
 ];
 
@@ -148,11 +154,11 @@ export default function HomePage() {
 
       {/* What you keep control of */}
       <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-3">
+        <div className="grid gap-px overflow-hidden rounded-[var(--radius-lg)] border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
           {reassurances.map(({ Icon, title, body }, i) => (
             <Reveal
               key={title}
-              delay={(i * 100) as 0 | 100 | 200}
+              delay={(Math.min(i * 100, 300)) as 0 | 100 | 200 | 300}
               className="bg-paper p-7"
             >
               <Icon className="h-5 w-5 text-accent-text" />
