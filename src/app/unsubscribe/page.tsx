@@ -20,13 +20,16 @@ export default function UnsubscribePage() {
   const search = useSearchParams();
   const email = search.get("email");
   const token = search.get("t");
-  const [state, setState] = useState<State>({ kind: "working" });
+  const [state, setState] = useState<State>(
+    // Same reasoning as the confirm page: an incomplete link needs no round
+    // trip to diagnose, so it is decided during render.
+    email && token
+      ? { kind: "working" }
+      : { kind: "error", message: "This unsubscribe link is incomplete." }
+  );
 
   useEffect(() => {
-    if (!email || !token) {
-      setState({ kind: "error", message: "This unsubscribe link is incomplete." });
-      return;
-    }
+    if (!email || !token) return;
 
     api
       .unsubscribe(email, token)

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Prata, Rubik } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/lib/auth";
 import Footer from "@/components/Footer";
 import PaperBackground from "@/components/PaperBackground";
 
@@ -67,10 +68,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </noscript>
       </head>
       <body className="min-h-full flex flex-col bg-paper text-ink">
-        <PaperBackground />
-        <Navbar />
-        <main className="relative z-10 flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <PaperBackground />
+          <Navbar />
+          <main className="relative z-10 flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

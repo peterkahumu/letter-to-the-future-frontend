@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 /* Design tokens. The app is dark-only: one palette, no light variant and no
-   data-theme switching. Every ink and accent role below clears 4.5:1 against
-   paper, surface and elevated; line-strong clears 3:1 for large numerals and
-   heavy borders. */
+   data-theme switching.
+
+   Contrast contract, verified against paper, surface, elevated and tint:
+     - every ink and accent role clears 4.5:1 (body text)
+     - line-strong clears 3:1 (interactive control boundaries, WCAG 1.4.11)
+     - line is decorative only and carries no minimum
+   Changing any of these values means re-checking the ratios. */
 :root {
   color-scheme: dark;
 
@@ -31,9 +35,16 @@
   --ink-soft: #c6dcd8;
   --ink-muted: #9db6b2;
 
-  /* Lines */
-  --line: #22423d;
-  --line-strong: #487f77;
+  /* Lines. Two grades, and the distinction is a requirement rather than a
+     preference: --line-strong is what draws the boundary of an interactive
+     control, so it clears WCAG 1.4.11's 3:1 against paper, surface,
+     elevated AND tint (worst case 3.45:1, on tint). --line is decorative
+     only — card edges, dividers, table rules — where no minimum applies.
+     Never put --line on an input, select, textarea, or bordered button:
+     that is the border someone needs to see to know where the control is. */
+  --line: #2c534c;
+  --line-strong: #568f85;
+  --line-hover: #7fb3a9;
 
   /* Accent roles. accent-text and accent-display are the bright end, safe on
      every surface; accent is the fill that accent-on sits against. */
@@ -47,6 +58,15 @@
      the turquoise, and the reason the palette doesn't read as monochrome. */
   --stamp: #f0c04a;
   --stamp-soft: #c99a2f;
+
+  /* Journal swatches. Decorative only — they tint a 10px dot that labels a
+     notebook, never text or a control boundary, so they carry no contrast
+     minimum. The label beside the dot is what actually names the journal;
+     colour alone never carries meaning here (1.4.1). */
+  --journal-rose: #f0929a;
+  --journal-violet: #b49bf0;
+  --journal-amber: #f0b45a;
+  --journal-slate: #8ba3a0;
 
   /* Raised panel used for the closing call to action */
   --panel: #0a2926;
@@ -65,7 +85,9 @@
   /* Feedback */
   --danger: #ffa39b;
   --danger-tint: #3a1512;
-  --danger-line: #7a2f29;
+  /* Also a control boundary — it is the border an invalid field wears, and
+     1.4.11 covers state as well as identity — so it clears 3:1 too. */
+  --danger-line: #c25c53;
 
   /* Elevation. Shadows do little on a dark ground, so they stay deep and
      are backed up by the surface steps above. */
@@ -98,6 +120,7 @@
 
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
+  --color-line-hover: var(--line-hover);
 
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
@@ -114,6 +137,11 @@
 
   --color-stamp: var(--stamp);
   --color-stamp-soft: var(--stamp-soft);
+
+  --color-journal-rose: var(--journal-rose);
+  --color-journal-violet: var(--journal-violet);
+  --color-journal-amber: var(--journal-amber);
+  --color-journal-slate: var(--journal-slate);
 
   --color-danger: var(--danger);
   --color-danger-tint: var(--danger-tint);

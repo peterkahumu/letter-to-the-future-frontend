@@ -206,7 +206,7 @@ export default function ConfirmationPage() {
             type="button"
             onClick={() => setConfirmingCancel(true)}
             disabled={cancelling}
-            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line px-5 text-sm font-medium text-ink transition-colors duration-200 hover:border-danger hover:text-danger disabled:opacity-60"
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-5 text-sm font-medium text-ink transition-colors duration-200 hover:border-danger hover:text-danger disabled:opacity-60"
           >
             {cancelling ? "Cancelling…" : "Cancel this letter"}
           </button>
@@ -228,7 +228,7 @@ export default function ConfirmationPage() {
           <button
             type="button"
             onClick={() => setConfirmingCancel(false)}
-            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line px-5 text-base font-medium text-ink transition-colors duration-200 hover:border-line-strong"
+            className="inline-flex h-11 items-center justify-center rounded-[var(--radius-sm)] border border-line-strong px-5 text-base font-medium text-ink transition-colors duration-200 hover:border-line-hover"
           >
             Keep it scheduled
           </button>

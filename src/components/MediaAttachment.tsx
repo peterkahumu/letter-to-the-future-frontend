@@ -52,6 +52,11 @@ export default function MediaAttachment({
 
   if (kind === "image") {
     return (
+      // Plain <img> on purpose. These are Cloudinary URLs, already resized
+      // and format-negotiated by an image CDN, so next/image would add a
+      // second optimiser in front of the first — a proxy hop and server CPU
+      // for no gain, plus a `sharp` dependency the standalone image lacks.
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={url}
         alt="Letter attachment"

@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, Italic, Strikethrough, List, ListOrdered, Heading2 } from 'lucide-react';
+import { Bold, Italic, Strikethrough, List, ListOrdered, Heading2, Clock } from 'lucide-react';
 import { useEffect } from 'react';
 
 interface RichTextEditorProps {
@@ -94,6 +94,20 @@ export default function RichTextEditor({ content, onChange, placeholder, classNa
           title="Ordered List"
         >
           <ListOrdered size={16} />
+        </button>
+        <div className="w-px h-5 bg-line mx-1" />
+        <button
+          type="button"
+          onClick={() => {
+            const now = new Date();
+            const pad = (n: number) => String(n).padStart(2, '0');
+            const stamp = `[${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}]`;
+            editor.chain().focus().insertContent(stamp).run();
+          }}
+          className="p-1.5 rounded transition-colors text-ink-soft hover:bg-surface"
+          title="Insert current timestamp"
+        >
+          <Clock size={16} />
         </button>
       </div>
       

@@ -30,14 +30,16 @@ export default function ConfirmPage() {
   const params = useParams<{ id: string }>();
   const search = useSearchParams();
   const token = search.get("token");
-  const [state, setState] = useState<State>({ kind: "working" });
+  const [state, setState] = useState<State>(
+    // A link with no token is broken before any request is made, so decide
+    // it during render rather than setting state from inside an effect.
+    token
+      ? { kind: "working" }
+      : { kind: "error", message: "This link is missing its confirmation code." }
+  );
 
   useEffect(() => {
-    if (!params.id) return;
-    if (!token) {
-      setState({ kind: "error", message: "This link is missing its confirmation code." });
-      return;
-    }
+    if (!params.id || !token) return;
 
     api
       .confirmLetter(params.id, token)
